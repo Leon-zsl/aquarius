@@ -1,0 +1,9 @@
+aquarius-base/target/*
+aquarius-account/target/*
+aquarius-chat/target/*
+aquarius-db/target/*
+aquarius-gate/target/*
+aquarius-master/target/*
+aquarius-stage/target/*
+aquarius-world/target/*
+*.class
