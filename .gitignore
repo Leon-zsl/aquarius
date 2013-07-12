@@ -6,4 +6,7 @@ aquarius-gate/target/*
 aquarius-master/target/*
 aquarius-stage/target/*
 aquarius-world/target/*
-*.class
+*/.class
+*/.classpath
+*/.project
+*/.settings
