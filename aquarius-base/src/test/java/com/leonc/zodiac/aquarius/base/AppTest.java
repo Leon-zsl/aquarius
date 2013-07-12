@@ -1,4 +1,4 @@
-package com.leonc.zodiac.aquarius-base;
+package com.leonc.zodiac.aquarius.base;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
