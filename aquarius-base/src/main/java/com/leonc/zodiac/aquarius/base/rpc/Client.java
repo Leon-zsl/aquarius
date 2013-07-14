@@ -75,13 +75,13 @@ public final class Client
         }
     }
 
-    public void sendPacket(String nodeid, String service, byte[] args) {
+    public void sendPacket(String id, String service, byte[] args) {
         Packet pck = new Packet();
         pck.setSender(owner.getServer().getId());
-        pck.setReceiver(nodeid);
+        pck.setReceiver(id);
         pck.setService(service);
         pck.setArgs(args);
-        Channel ch = conns.get(nodeid);
+        Channel ch = conns.get(id);
         if(ch != null) {
             ch.write(pck);
         }
