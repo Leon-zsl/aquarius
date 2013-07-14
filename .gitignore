@@ -10,3 +10,4 @@ aquarius-world/target/*
 */.classpath
 */.project
 */.settings
+*/*.log
