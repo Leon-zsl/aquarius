@@ -1,21 +1,20 @@
 package com.leonc.zodiac.aquarius.base.rpc;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 public class Node 
 {
-    private Server server = new Server();
-    private ConcurrentHashMap<String, Client> clients = new ConcurrentHashMap<String, Client>();
+    private Server server = null;
+    private Client client = null;
 
-    public void startServer(String name, String type, String ip, int port) {
-        //todo:
+    public Server getServer() { return this.server; }
+    public Client getClient() { return this.client; }
+
+    public void initServer(String id, int port) {
+        server = new Server(this, id, port);
+        server.start();
     }
 
-    public void connectToNode(String nameName, String type, String ip, int port) {
-        //todo:
-    }
-
-    public void disconnectFrom(String name) {
-        //todo:
+    public void initClient() {
+        client = new Client(this);
+        client.start();
     }
 }
