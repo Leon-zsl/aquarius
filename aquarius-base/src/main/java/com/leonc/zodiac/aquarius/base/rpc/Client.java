@@ -75,14 +75,13 @@ public final class Client
         }
     }
 
-    public void sendPacket(String id, String service, byte[] args) {
-        Packet pck = new Packet();
-        pck.setSender(owner.getServer().getId());
-        pck.setReceiver(id);
-        pck.setService(service);
-        pck.setArgs(args);
-        Channel ch = conns.get(id);
+    public void remoteCall(Command cmd) {
+        if(cmd == null) return;
+
+        Channel ch = conns.get(cmd.getRemoteId());
         if(ch != null) {
+            Packet pck = new Packet(owner.getServer().getId(), cmd.getRemoteId(),
+                                    cmd.getServiceName(), cmd.getArgs());
             ch.write(pck);
         }
     }

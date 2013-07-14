@@ -31,30 +31,49 @@ public class Node
     private NodeInfo serverInfo = new NodeInfo();
     private CopyOnWriteArrayList<NodeInfo> clientInfoList = new CopyOnWriteArrayList<NodeInfo>();
 
-    public Server getServer() { return this.server; }
-    public Client getClient() { return this.client; }
-
-    public void initServer(String id, int port) {
-        server = new Server(this, this.serverInfo.nodeId, port);
-        server.start();
-        
-        this.serverInfo.nodeId = id;
+    public Node(String type) {
+        this.serverInfo.nodeType = type;
     }
 
-    public void initClient() {
-        client = new Client(this);
-        client.start();
+    public synchronized void start(String nodeId, int listenPort) {
+        initServer(nodeId, listenPort);
+        initClient();
     }
 
-    public void close() {
+    public synchronized void close() {
         this.server.close();
         this.client.close();
         
         this.clientInfoList.clear();
     }
 
-    public Node(String type) {
-        this.serverInfo.nodeType = type;
+    public synchronized void initServer(String id, int port) {
+        server = new Server(this, this.serverInfo.nodeId, port);
+        server.start();
+        
+        this.serverInfo.nodeId = id;
+    }
+
+    public synchronized void initClient() {
+        client = new Client(this);
+        client.start();
+    }
+
+    public Server getServer() { return this.server; }
+    public Client getClient() { return this.client; }
+
+    public String getNodeId() { return this.server.getId(); }
+    
+    public void registerService(String name, Service sv) {
+        this.server.registerService(name, sv);
+    }
+
+    public void unregisterService(String name) {
+        this.server.unregisterService(name);
+    }
+
+    public void remoteCall(Command cmd) {
+        this.client.remoteCall(cmd);
     }
 
     public void connectToNode(String nodeid, String nodetype, String ip, int port) {
@@ -70,10 +89,6 @@ public class Node
         this.client.disconnect(nodeid);
         NodeInfo n = getClientNode(nodeid);
         this.clientInfoList.remove(n);
-    }
-
-    public void sendPacket(String nodeid, String service, byte[] args) {
-        this.client.sendPacket(nodeid, service, args);
     }
 
     public NodeInfo getClientNode(String nodeid) {

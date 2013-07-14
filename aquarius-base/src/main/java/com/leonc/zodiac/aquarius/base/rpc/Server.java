@@ -63,7 +63,7 @@ public class Server
         services.putIfAbsent(name, sv);
     }
 
-    public void unregisterService(String name, Service sv) {
+    public void unregisterService(String name) {
         services.remove(name);
     }
 
@@ -84,8 +84,12 @@ public class Server
                         Service sv = services.get(pck.getService());
                         if(!running.get()) break;
 
-                        if(sv != null)
-                            sv.Handle(pck);
+                        if(sv != null) {
+                            Command cmd = new Command(pck.getSender(), 
+                                                      pck.getService(), 
+                                                      pck.getArgs());
+                            sv.handleCommand(cmd);
+                        }
                     }
                     if(!running.get())
                         break;

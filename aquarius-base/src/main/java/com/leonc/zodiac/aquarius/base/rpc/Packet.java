@@ -16,17 +16,31 @@ public class Packet {
     private String service = "";
     private byte[] args = null;
 
+    public Packet() {
+        this.sender = "";
+        this.receiver = "";
+        this.service = "";
+        this.args = null;
+    }
+
+    public Packet(String sender, String receiver, String service, byte[] args) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.service = service;
+        this.args = args;
+    }
+
     public String getSender() { return this.sender; }
-    public void setSender(String sender) { this.sender = sender; }
+    public Packet setSender(String sender) { this.sender = sender; return this; }
 
     public String getReceiver() { return this.receiver; }
-    public void setReceiver(String receiver) { this.receiver = receiver; }
+    public Packet setReceiver(String receiver) { this.receiver = receiver; return this; }
 
     public String getService() { return this.service; }
-    public void setService(String service) { this.service = service; }
+    public Packet setService(String service) { this.service = service; return this; }
 
     public byte[] getArgs() { return this.args; }
-    public void setArgs(byte[] args) { this.args = args; }
+    public Packet setArgs(byte[] args) { this.args = args; return this; }
 
     public void encode(ChannelBuffer buf) {
         Charset set = Charset.forName("utf-8");
