@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 //import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.protobuf.Message;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -80,8 +82,17 @@ public final class Client
 
         Channel ch = conns.get(cmd.getRemoteId());
         if(ch != null) {
-            Packet pck = new Packet(owner.getServer().getId(), cmd.getRemoteId(),
-                                    cmd.getServiceName(), cmd.getArgs());
+            Packet pck = new Packet();
+            pck.setSender(owner.getServer().getId());
+            pck.setReceiver(cmd.getRemoteId());
+
+            pck.setServiceName(cmd.getServiceName());
+            pck.setMethodName(cmd.getMethodName());
+
+            Message msg = cmd.getMessage();
+            pck.setMessageName(msg.getClass().getName());
+            pck.setMessageData(msg.toByteArray());
+
             ch.write(pck);
         }
     }

@@ -13,21 +13,28 @@ public class Packet {
 	
     private String sender = "";
     private String receiver = "";
-    private String service = "";
-    private byte[] args = null;
+    private String serviceName = "";
+    private String methodName = "";
+    private String messageName = "";
+    private byte[] messageData = null;
 
     public Packet() {
         this.sender = "";
         this.receiver = "";
-        this.service = "";
-        this.args = null;
+        this.serviceName = "";
+        this.methodName = "";
+        this.messageName = "";
+        this.messageData = null;
     }
 
-    public Packet(String sender, String receiver, String service, byte[] args) {
+    public Packet(String sender, String receiver, String serviceName, String methodName,
+                  String messageName, byte[] messageData) {
         this.sender = sender;
         this.receiver = receiver;
-        this.service = service;
-        this.args = args;
+        this.serviceName = serviceName;
+        this.methodName = methodName;
+        this.messageName = messageName;
+        this.messageData = messageData;
     }
 
     public String getSender() { return this.sender; }
@@ -36,39 +43,54 @@ public class Packet {
     public String getReceiver() { return this.receiver; }
     public Packet setReceiver(String receiver) { this.receiver = receiver; return this; }
 
-    public String getService() { return this.service; }
-    public Packet setService(String service) { this.service = service; return this; }
+    public String getServiceName() { return this.serviceName; }
+    public Packet setServiceName(String name) { this.serviceName = name; return this; }
 
-    public byte[] getArgs() { return this.args; }
-    public Packet setArgs(byte[] args) { this.args = args; return this; }
+    public String getMethodName() { return this.methodName; }
+    public Packet setMethodName(String name) { this.methodName = name; return this; }
+
+    public String getMessageName() { return this.messageName; }
+    public Packet setMessageName(String name) { this.messageName = name; return this; }
+
+    public byte[] getMessageData() { return this.messageData; }
+    public Packet setMessageData(byte[] data) { this.messageData = data; return this; }
 
     public void encode(ChannelBuffer buf) {
         Charset set = Charset.forName("utf-8");
 
-        byte[] sb = this.sender.getBytes(set);
-        buf.writeShort((short)sb.length);
-        buf.writeBytes(sb);
+        byte[] data = this.sender.getBytes(set);
+        buf.writeShort((short)data.length);
+        buf.writeBytes(data);
 
-        byte[] rb = this.receiver.getBytes(set);
-        buf.writeShort((short)rb.length);
-        buf.writeBytes(rb);
+        data = this.receiver.getBytes(set);
+        buf.writeShort((short)data.length);
+        buf.writeBytes(data);
 
-        byte[] svb = this.service.getBytes(set);
-        buf.writeShort((short)svb.length);
-        buf.writeBytes(svb);
+        data = this.serviceName.getBytes(set);
+        buf.writeShort((short)data.length);
+        buf.writeBytes(data);
 
-        if(this.args == null) {
+        data = this.methodName.getBytes(set);
+        buf.writeShort((short)data.length);
+        buf.writeBytes(data);
+
+        data = this.messageName.getBytes(set);
+        buf.writeShort((short)data.length);
+        buf.writeBytes(data);
+
+        data = this.messageData;
+        if(data == null) {
             buf.writeInt(0);
         } else {
-            buf.writeInt(this.args.length);
-            buf.writeBytes(this.args);
+            buf.writeInt(data.length);
+            buf.writeBytes(data);
         }
     }
 
     public void decode(ChannelBuffer buf) {
-        String set = "utf-8";
+        try {
+            String set = "utf-8";
 
-       try {
 	        short len = buf.readShort();
 	        byte[] tmp = new byte[len];
 	        buf.readBytes(tmp);
@@ -82,11 +104,21 @@ public class Packet {
 	        len = buf.readShort();
 	        tmp = new byte[len];
 	        buf.readBytes(len);
-	        this.service = new String(tmp, set);
+	        this.serviceName = new String(tmp, set);
+
+            len = buf.readShort();
+            tmp = new byte[len];
+            buf.readBytes(tmp);
+            this.methodName = new String(tmp, set);
 	
+            len = buf.readShort();
+            tmp = new byte[len];
+            buf.readBytes(tmp);
+            this.messageName = new String(tmp, set);
+
 	        int l = buf.readInt();
-	        this.args = new byte[l];
-	        buf.readBytes(this.args);
+	        this.messageData = new byte[l];
+	        buf.readBytes(this.messageData);
        } catch(UnsupportedEncodingException e) {
     	   logger.error("packet decode exception" + e);
        }

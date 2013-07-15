@@ -1,0 +1,19 @@
+package master;
+
+option java_package = "com.leonc.zodiac.aquarius.base.proto";
+option java_outer_classname = "ProtoNode";
+
+option optimize_for = SPEED;
+
+message NodeInfo
+{
+    optional string id = 1;
+    optional string type = 2;
+    optional string ip = 3;
+    optional int32 port = 4;
+}
+
+message NodeInfoList
+{
+    optional repeated NodeInfo nodeList = 1;
+}

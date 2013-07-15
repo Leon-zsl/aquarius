@@ -4,13 +4,18 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import java.lang.Thread;
-
 import java.net.InetSocketAddress;
+
+import com.google.protobuf.Message;
+import java.lang.reflect.*;
+import java.lang.Class;
+
+import java.lang.Thread;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +49,7 @@ public class Server
         bootstrap.bind(new InetSocketAddress(port));
 
         this.bootstrap = bootstrap;
+        
         this.running.set(true);
         Thread th = new Thread(new Dispatcher());
         th.start();
@@ -59,12 +65,11 @@ public class Server
 
     public String getId() { return this.id; }
 
-    public void registerService(String name, Service sv) {
-        services.putIfAbsent(name, sv);
-    }
+    public void registerService(Service sv) {
+        if(sv == null) return;
 
-    public void unregisterService(String name) {
-        services.remove(name);
+        String name = sv.getClass().getSimpleName();
+        services.putIfAbsent(name, sv);
     }
 
     public void putPacket(Packet pck) {
@@ -74,6 +79,7 @@ public class Server
 
     private class Dispatcher implements Runnable {
         public void run() {
+            ExecutorService threalPool = Executors.newCachedThreadPool();
             while(true) {
                 try {
                     long st = System.currentTimeMillis();
@@ -81,15 +87,9 @@ public class Server
                         Packet pck = pckQ.poll();
                         if(pck == null) break;
 
-                        Service sv = services.get(pck.getService());
                         if(!running.get()) break;
 
-                        if(sv != null) {
-                            Command cmd = new Command(pck.getSender(), 
-                                                      pck.getService(), 
-                                                      pck.getArgs());
-                            sv.handleCommand(cmd);
-                        }
+                        threalPool.execute(new PacketHandler(pck));
                     }
                     if(!running.get())
                         break;
@@ -97,6 +97,54 @@ public class Server
                     Thread.sleep(30 - elapse);
                 } catch(Exception e) {
                     logger.error("execute service exception:" + e);
+                }
+            }
+            
+            threalPool.shutdown();
+        }
+
+        private class PacketHandler implements Runnable {
+            private Packet packet;
+
+            public PacketHandler(Packet pck) {
+                this.packet = pck;
+            }
+
+            public void run() {
+                Packet pck = this.packet;
+                if(pck == null) return;
+
+                try {
+                    Service sv = services.get(pck.getServiceName());
+                    if(sv == null) {
+                        logger.info("service not exists:" + pck.getServiceName());
+                        return;
+                    }
+
+                    Command cmd = new Command();
+                    cmd.setRemoteId(pck.getSender());
+                    
+                    cmd.setServiceName(pck.getServiceName());
+                    cmd.setMethodName(pck.getMethodName());
+
+                    String clsName = pck.getMessageName();
+                    Class cls = Class.forName(clsName);
+                    Method instance = cls.getDeclaredMethod("getDefaultInstance", null);
+                    Message proto = (Message)instance.invoke(null, null);
+                    Message msg = proto.newBuilderForType().mergeFrom(pck.getMessageData()).build();
+                    cmd.setMessage(msg);
+
+                    Class clsService = sv.getClass();
+                    Method handler = clsService.getDeclaredMethod(cmd.getMethodName(), Command.class);
+                    handler.invoke(sv, cmd);
+                } catch(Exception ex) {
+                    logger.error("java pck handle exception:" + 
+                                 "\n[service]" + pck.getServiceName() + 
+                                 "\n[method]" + pck.getMethodName() +
+                                 "\n[message]" + pck.getMessageName() +
+                                 "\n[message data]" + pck.getMessageData() +
+                                 "\n[except]" + ex);
+                    return;
                 }
             }
         }

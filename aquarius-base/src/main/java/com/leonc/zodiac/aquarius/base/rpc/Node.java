@@ -64,12 +64,8 @@ public class Node
 
     public String getNodeId() { return this.server.getId(); }
     
-    public void registerService(String name, Service sv) {
-        this.server.registerService(name, sv);
-    }
-
-    public void unregisterService(String name) {
-        this.server.unregisterService(name);
+    public void registerService(Service sv) {
+        this.server.registerService(sv);
     }
 
     public void remoteCall(Command cmd) {
