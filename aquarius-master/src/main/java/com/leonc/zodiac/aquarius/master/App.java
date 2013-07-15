@@ -17,14 +17,16 @@ public class App
     private static App instance = new App();
     public static App getInstance() { return instance; }
 
-    private Properties sysConf = new Properties();
-    private Node node = null;
     private volatile boolean running = false;
+    private Node node = null;
+    private NodeManager nodeMgr = null;
+    private Properties sysConf = new Properties();
 
     private static Log logger = LogFactory.getLog(App.class);
 
     public Properties getSysConf() { return this.sysConf; }
     public Node getNode() { return this.node; }
+    public NodeManager getNodeMgr() { return this.nodeMgr; }
 
     public void startup() {
         System.out.println("master starting...");
@@ -36,12 +38,19 @@ public class App
 
         this.createService(n);
         this.running = true;
+
+        this.nodeMgr = new NodeManager();
+        this.nodeMgr.start();
         System.out.println("master started");
 
         this.mainLoop();
 
         System.out.println("master closing...");
         this.running = false;
+        if(this.nodeMgr != null) {
+            this.nodeMgr.close();
+            this.nodeMgr = null;
+        }
         if(this.node != null) {
             this.node.close();
             this.node = null;
@@ -57,7 +66,7 @@ public class App
         while(this.running) {
             try {
                 long st = System.currentTimeMillis();
-                //todo: the mainloop
+                this.nodeMgr.update();
                 long dt = System.currentTimeMillis() - st;
                 Thread.sleep(Global.FRAME_TIME - dt);
             } catch(Exception ex) {

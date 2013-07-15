@@ -21,3 +21,4 @@ aquarius-world/bin/*
 */.settings
 */*.log
 log/*
+*#

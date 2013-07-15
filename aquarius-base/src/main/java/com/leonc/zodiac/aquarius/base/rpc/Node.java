@@ -38,7 +38,14 @@ public class Node
     }
 
     public synchronized void start(String nodeId, int listenPort) {
-        initServer(nodeId, listenPort);
+        initServer(nodeId, listenPort, false);
+        initClient();
+    }
+
+    public synchronized void start(String nodeId, 
+                                   int listenPort, 
+                                   boolean singleThread) {
+        initServer(nodeId, listenPort, singleThread);
         initClient();
     }
 
@@ -49,9 +56,11 @@ public class Node
         this.clientInfoList.clear();
     }
 
-    public synchronized void initServer(String id, int port) {
+    public synchronized void initServer(String id, 
+                                        int port, 
+                                        boolean singleThread) {
         server = new Server(this, this.serverInfo.nodeId, port);
-        server.start();
+        server.start(singleThread);
         
         this.serverInfo.nodeId = id;
     }

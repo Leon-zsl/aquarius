@@ -6,7 +6,7 @@ import com.leonc.zodiac.aquarius.base.rpc.Command;
 public class NodeService implements Service 
 {
     public void Heartbeat(Command cmd) {
-        //todo:
+        
     }
 
     public void JoinIn(Command cmd) {
