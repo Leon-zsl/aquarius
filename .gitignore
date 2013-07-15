@@ -1,5 +1,6 @@
 aquarius-base/target/*
 aquarius-base/bin/*
+aquarius-base/src/main/java/com/leonc/zodiac/aquarius/base/proto/*.java
 aquarius-account/target/*
 aquarius-account/bin/*
 aquarius-chat/target/*
@@ -19,3 +20,4 @@ aquarius-world/bin/*
 */.project
 */.settings
 */*.log
+log/*
