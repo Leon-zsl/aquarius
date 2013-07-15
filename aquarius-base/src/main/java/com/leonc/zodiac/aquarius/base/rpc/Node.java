@@ -71,6 +71,11 @@ public class Node
     public void remoteCall(Command cmd) {
         this.client.remoteCall(cmd);
     }
+    
+    public void remoteCall(String nodeId, String serviceName, String methodName,
+                           Message msg) {
+        this.remoteCall(new Command(nodeId, serviceName, methodName, message));
+    }
 
     public void connectToNode(String nodeid, String nodetype, String ip, int port) {
         if(this.getClientNode(nodeid) != null) {
