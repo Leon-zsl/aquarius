@@ -1,0 +1,13 @@
+package account;
+
+option java_package = "com.leonc.zodiac.aquarius.base.proto";
+option java_outer_classname = "ProtoAccount";
+
+option optimize_for = SPEED;
+
+message LoginInfo
+{
+    optional string sid = 1;
+}
+
+

@@ -1,0 +1,24 @@
+package node;
+
+option java_package = "com.leonc.zodiac.aquarius.base.message";
+option java_outer_classname = "MsgNode";
+
+option optimize_for = SPEED;
+
+message HeartBeatInfo
+{
+    optional string nodeId = 1;
+}
+
+message NodeInfo
+{
+    optional string nodeId = 1;
+    optional string nodeType = 2;
+    optional string ip = 3;
+    optional int32 port = 4;
+}
+
+message NodeInfoList
+{
+    repeated NodeInfo nodeList = 1;
+}

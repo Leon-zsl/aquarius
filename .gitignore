@@ -12,3 +12,6 @@ log/*
 *.out
 release/*
 exp/*
+aquarius-base/src/main/java/com/leonc/zodiac/aquarius/base/proto/*.java
+aquarius-base/src/main/java/com/leonc/zodiac/aquarius/base/message/*.java
+aquarius-base/src/main/java/com/leonc/zodiac/aquarius/base/conf/*.java
