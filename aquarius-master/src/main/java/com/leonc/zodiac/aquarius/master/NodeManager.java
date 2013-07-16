@@ -12,11 +12,11 @@ public class NodeManager
     private ConcurrentHashMap<String, Node> nodeMap = new ConcurrentHashMap<String, Node>();
 
     public void start() {
-        //do nothing
+        //do nothing:
     }
     
     public void close() {
-    	//do nothing
+    	//do nothing:
     }
 
     public void update() {
