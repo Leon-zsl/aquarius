@@ -1,6 +1,5 @@
 ## -*- coding: utf-8 -*-
-<%def name="conv_type(type)">
-<%
+<%def name="conv_type(type)"><%
 func = ''
 if type.startswith("bool"):
     func = type.replace("boolean", "bool").replace("bool", "boolean")
@@ -9,10 +8,8 @@ elif type.startswith("string"):
 else:
 	func = type
 return func
-%>
-</%def>
-<%def name="conv_value(type, value)">
-<%
+%></%def>
+<%def name="conv_value(type, value)"><%
 val = ''
 if type.startswith("bool"):
    if value == 0 or value == "0":
@@ -30,10 +27,8 @@ elif type.startswith("string"):
 else:
    val = "" + str(value)
 return val
-%>
-</%def>
-<%def name="type_of_arr(arr)">
-<%
+%></%def>
+<%def name="type_of_arr(arr)"><%
 type = arr.strip('[]')
 if type.startswith("bool"):
     func = type.replace("boolean", "bool").replace("bool", "boolean")
@@ -42,8 +37,7 @@ elif type.startswith("string"):
 else:
 	func = type
 return func
-%>
-</%def>
+%></%def>
 <%
 last_item_index = 0
 for i in range(len(client_list)):
@@ -113,24 +107,19 @@ ${conv_type(type_list[last_item_index - 1])} ${name_list[last_item_index - 1]}\
 % if has_array_item:
         int arr_item_len_${class_name};
 % endif
-
 % for j in range(last_item_index):
     % if client_list[j].count('s') > 0:
         % if arr_list[j]:
-
         arr_item_len_${class_name} = ${len(value_list[i][j])};
         ${conv_type(type_list[j])} ${name_list[j]} = new ${type_of_arr(type_list[j])} [arr_item_len_${class_name}];
-
 	        % for k in range(len(value_list[i][j])):
         ${name_list[j]}[${k}] = ${conv_value(type_list[j],value_list[i][j][k])};
 			% endfor		
         % else:
-
         ${conv_type(type_list[j])} ${name_list[j]} = ${conv_value(type_list[j], value_list[i][j])};
         % endif
     % endif
 % endfor
-        
         ${class_name} new_obj_${class_name} = new ${class_name}(\
 % for j in range(last_item_index - 1):
      % if client_list[j].count('s') > 0:
