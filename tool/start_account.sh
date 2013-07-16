@@ -1,5 +1,5 @@
 #!/bin/sh
-RUNTIME_PARAM="-server -Xms1024m -Xmx1024m -Xmn480m -Xss256k -XX:+UseParallelGC -XX:+UseBiasedLocking -XX:+AggressiveOpts -XX:+HeapDumpOnOutOfMemoryError"
+RUNTIME_PARAM="-server -Xms512m -Xmx512m -Xmn128m -Xss128k -XX:+UseParallelGC -XX:+UseBiasedLocking -XX:+AggressiveOpts -XX:+HeapDumpOnOutOfMemoryError"
 DEBUG=""
 CLSPATH=""
 
