@@ -7,66 +7,82 @@ import path_util
 def build_base():
     os.chdir("../aquarius-base")
     os.system("mvn clean install")
-    
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build_master():
     os.chdir("../aquarius-master")
     os.system("mvn clean package")
 
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build_gate():
     os.chdir("../aquarius-gate")
     os.system("mvn clean package")
 
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build_db():
     os.chdir("../aquarius-db")
     os.system("mvn clean package")
 
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build_world():
     os.chdir("../aquarius-world")
     os.system("mvn clean package")
 
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build_stage():
     os.chdir("../aquarius-stage")
     os.system("mvn clean package")
 
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build_chat():
     os.chdir("../aquarius-chat")
     os.system("mvn clean package")
 
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build_account():
     os.chdir("../aquarius-account")
     os.system("mvn clean package")
 
-    path_util.copy_folder_type(os.path.abspath("target"), 
-                               os.path.abspath("../release"),
-                               ".jar")
+    srcdir = os.path.abspath("target")
+    dstdir = os.path.abspath("../release")
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build():
     build_base()
