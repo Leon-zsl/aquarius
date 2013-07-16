@@ -192,11 +192,11 @@ def pack_config_dir(mako_file, src_dir, code_dir):
     for file in os.listdir(src_dir):
         if os.path.isfile(os.path.join(src_dir, file)) \
                 and os.path.splitext(file)[1] == '.xls':
-            print "pack file: " + file
             file_name = os.path.splitext(file)[0]
             code_file = file_name + '.java'
             class_name = file_name
 
+            except_handler.STEP = file
             cfg_data = parse_xls(os.path.join(src_dir, file))
             exp_code_file(os.path.join(code_dir, code_file),
                           mako_file, cfg_data, class_name)

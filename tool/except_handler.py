@@ -2,8 +2,11 @@
 import sys
 import traceback
 
+STEP = ""
+
 def _excepthook(exctype, value, tb):
     print "Exception Caught!"
+    print "step: " + STEP
     print "type: " + str(exctype)
     print "value: " + str(value)
     #print 'you get an unknown exception, contact author zhang shi liang!'
