@@ -1,0 +1,27 @@
+package message.common;
+
+option java_package = "com.leonc.zodiac.aquarius.base.message";
+option java_outer_classname = "MsgCommon";
+
+option optimize_for = SPEED;
+
+message EmptyMsg {}
+
+message IntMsg { required int32 value = 1; }
+
+message LongMsg { required int64 value = 1; }
+
+message StringMsg { required string value = 1; }
+
+message BoolMsg { required bool value = 1; }
+
+message FloatMsg { required float value = 1; }
+
+message DoubleMsg { required double value = 1; }
+
+message BytesMsg { required bytes value = 1; }
+
+message BaseResponse {
+    optional int32 errCode = 1;
+    optional string errMsg = 2;
+}

@@ -21,16 +21,25 @@ public final class Client
     private static Log logger = LogFactory.getLog(Client.class);
 
     private Node owner = null;
-
-    private ConcurrentHashMap<String, Channel> conns = new ConcurrentHashMap<String, Channel>();
     private ClientBootstrap bootstrap = null;
+
+    private ClientConnListener connListener = null;
+    private ConcurrentHashMap<String, Channel> conns = new ConcurrentHashMap<String, Channel>();
 
     public Client(Node owner) {
         this.owner = owner;
     }
 
-    public synchronized void start() {
+    public ClientConnListener getConnListener() { return this.connListener; }
+
+    public Channel getChannel(String ip, int port) {
+        String addr = ip + ":" + port;
+        return conns.get(addr);
+    }
+
+    public synchronized void start(ClientConnListener l) {
         logger.info("start client...");
+        this.connListener = l;
         ClientBootstrap bootstrap = new ClientBootstrap(
             new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
                                               Executors.newCachedThreadPool()));
@@ -51,49 +60,111 @@ public final class Client
         }
     }
 
-    public synchronized void connect(String id, String ip, int port) {
-        if(id == null || id.equals("") || ip == null || ip.equals("") || port == 0)
+    public synchronized void connect(String ip, int port) {
+        if(ip == null || ip.equals("") || port == 0)
             return;
 
-        if(conns.containsKey(id)) {
-            logger.info("node exists:" + id);
+        String addr = ip + ":" + port;
+        if(conns.containsKey(addr)) {
+            logger.info("node exists:" + addr);
             return;
         }
 
-        logger.info("connect new node:[id]" + id + "[ip]" + ip + "[port]" + port);
+        logger.info("connect new node:" + "[ip]" + ip + "[port]" + port);
 
         ChannelFuture future = bootstrap.connect(new InetSocketAddress(ip, port));
         Channel channel = future.awaitUninterruptibly().getChannel();
-        this.conns.putIfAbsent(id, channel);
+        this.conns.putIfAbsent(addr, channel);
     }
 
-    public synchronized void disconnect(String id) {
-        if(id == null || id.equals(""))
+    public synchronized void disconnect(String ip, int port) {
+        if(ip == null || ip.equals("") || port == 0)
             return;
-        Channel ch = this.conns.get(id);
+        String addr = ip + ":" + port;
+        Channel ch = this.conns.get(addr);
         if(ch != null) {
             ch.close();
-            this.conns.remove(id);
+            this.conns.remove(addr);
         }
     }
 
-    public void remoteCall(Command cmd) {
-        if(cmd == null) return;
+    public void nodeConnected(Channel ch) {
+        if(this.connListener == null) return;
+        
+        InetSocketAddress addr = (InetSocketAddress)ch.getRemoteAddress();
+        this.connListener.nodeConnected(addr.getHostString(),
+                                        addr.getPort());
+    }
 
-        Channel ch = conns.get(cmd.getRemoteId());
+    public void nodeDisconnected(Channel ch) {
+        if(this.connListener == null) return;
+
+        InetSocketAddress addr = (InetSocketAddress)ch.getRemoteAddress();
+        String key = addr.getHostString() + ":" + addr.getPort();
+        Channel channel = this.conns.get(key);
+        if(channel == null) return;
+
+        this.connListener.nodeDisconnected(addr.getHostString(),
+                                           addr.getPort());
+        channel.close();
+        this.conns.remove(key);
+    }
+
+    public void remoteCall(String ip, int port, String serviceName, 
+                           String methodName, Message msg) {
+        if(ip == null || ip == "" || port == 0)
+            return;
+
+        String addr = ip + ":" + port;
+        Channel ch = conns.get(addr);
         if(ch != null) {
             Packet pck = new Packet();
-            pck.setSender(owner.getServer().getId());
-            pck.setReceiver(cmd.getRemoteId());
 
-            pck.setServiceName(cmd.getServiceName());
-            pck.setMethodName(cmd.getMethodName());
+            pck.setServiceName(serviceName);
+            pck.setMethodName(methodName);
 
-            Message msg = cmd.getMessage();
             pck.setMessageName(msg.getClass().getName());
             pck.setMessageData(msg.toByteArray());
 
             ch.write(pck);
         }
+    }
+
+    public void broadcast(String serviceName, String methodName, Message msg) {
+        for(Channel ch : conns.values()) {
+            if(ch == null) continue;
+
+            Packet pck = new Packet();
+
+            pck.setServiceName(serviceName);
+            pck.setMethodName(methodName);
+
+            pck.setMessageName(msg.getClass().getName());
+            pck.setMessageData(msg.toByteArray());
+
+            ch.write(pck);            
+        }
+    }
+
+    public void broadcastToOthers(String excludeIp, int excludePort, 
+                                  String serviceName, String methodName, 
+                                  Message msg) {
+        String targetAddr = excludeIp + ":" + excludePort;
+        for(String addr : conns.keySet()) {
+            if(addr.equals(targetAddr)) continue;
+
+            Channel ch = conns.get(addr);
+            if(ch == null) continue;
+
+            Packet pck = new Packet();
+
+            pck.setServiceName(serviceName);
+            pck.setMethodName(methodName);
+
+            pck.setMessageName(msg.getClass().getName());
+            pck.setMessageData(msg.toByteArray());
+
+            ch.write(pck);            
+        }        
     }
 }

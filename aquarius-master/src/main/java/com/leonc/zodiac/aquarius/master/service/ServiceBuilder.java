@@ -6,7 +6,7 @@ import com.leonc.zodiac.aquarius.base.rpc.Service;
 public class ServiceBuilder
 {
     public static void build(Node n) {
-        Service sv = new NodeService();
+        Service sv = new PeerService();
         n.registerService(sv);
     }
 }

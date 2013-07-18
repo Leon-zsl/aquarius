@@ -1,16 +1,13 @@
-package node;
+package message.peer;
+
+import "common.proto";
 
 option java_package = "com.leonc.zodiac.aquarius.base.message";
-option java_outer_classname = "MsgNode";
+option java_outer_classname = "MsgPeer";
 
 option optimize_for = SPEED;
 
-message HeartBeatInfo
-{
-    optional string nodeId = 1;
-}
-
-message NodeInfo
+message PeerInfo
 {
     optional string nodeId = 1;
     optional string nodeType = 2;
@@ -18,7 +15,7 @@ message NodeInfo
     optional int32 port = 4;
 }
 
-message NodeInfoList
+message PeerInfoList
 {
-    repeated NodeInfo nodeList = 1;
+    repeated PeerInfo peerList = 1;
 }

@@ -11,37 +11,31 @@ import org.apache.commons.logging.LogFactory;
 public class Packet {
 	private static Log logger = LogFactory.getLog(Packet.class);
 	
-    private String sender = "";
-    private String receiver = "";
     private String serviceName = "";
     private String methodName = "";
     private String messageName = "";
     private byte[] messageData = null;
 
     public Packet() {
-        this.sender = "";
-        this.receiver = "";
         this.serviceName = "";
         this.methodName = "";
         this.messageName = "";
         this.messageData = null;
     }
 
-    public Packet(String sender, String receiver, String serviceName, String methodName,
+    public Packet(String serviceName, String methodName,
                   String messageName, byte[] messageData) {
-        this.sender = sender;
-        this.receiver = receiver;
         this.serviceName = serviceName;
         this.methodName = methodName;
         this.messageName = messageName;
         this.messageData = messageData;
     }
 
-    public String getSender() { return this.sender; }
-    public Packet setSender(String sender) { this.sender = sender; return this; }
+    // public String getSender() { return this.sender; }
+    // public Packet setSender(String sender) { this.sender = sender; return this; }
 
-    public String getReceiver() { return this.receiver; }
-    public Packet setReceiver(String receiver) { this.receiver = receiver; return this; }
+    // public String getReceiver() { return this.receiver; }
+    // public Packet setReceiver(String receiver) { this.receiver = receiver; return this; }
 
     public String getServiceName() { return this.serviceName; }
     public Packet setServiceName(String name) { this.serviceName = name; return this; }
@@ -57,14 +51,15 @@ public class Packet {
 
     public void encode(ChannelBuffer buf) {
         Charset set = Charset.forName("utf-8");
+        byte[] data = null;
 
-        byte[] data = this.sender.getBytes(set);
-        buf.writeShort((short)data.length);
-        buf.writeBytes(data);
+        // byte[] data = this.sender.getBytes(set);
+        // buf.writeShort((short)data.length);
+        // buf.writeBytes(data);
 
-        data = this.receiver.getBytes(set);
-        buf.writeShort((short)data.length);
-        buf.writeBytes(data);
+        // data = this.receiver.getBytes(set);
+        // buf.writeShort((short)data.length);
+        // buf.writeBytes(data);
 
         data = this.serviceName.getBytes(set);
         buf.writeShort((short)data.length);
@@ -91,15 +86,18 @@ public class Packet {
         try {
             String set = "utf-8";
 
-	        short len = buf.readShort();
-	        byte[] tmp = new byte[len];
-	        buf.readBytes(tmp);
-	        this.sender = new String(tmp, set);
+            short len = 0;
+            byte[] tmp = null;
+
+	        // short len = buf.readShort();
+	        // byte[] tmp = new byte[len];
+	        // buf.readBytes(tmp);
+	        // this.sender = new String(tmp, set);
 	
-	        len = buf.readShort();
-	        tmp = new byte[len];
-	        buf.readBytes(len);
-	        this.receiver = new String(tmp, set);
+	        // len = buf.readShort();
+	        // tmp = new byte[len];
+	        // buf.readBytes(len);
+	        // this.receiver = new String(tmp, set);
 	
 	        len = buf.readShort();
 	        tmp = new byte[len];

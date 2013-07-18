@@ -2,20 +2,24 @@ package com.leonc.zodiac.aquarius.base.rpc;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.channel.Channel;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import java.net.InetSocketAddress;
-
-import com.google.protobuf.Message;
 import java.lang.reflect.*;
 import java.lang.Class;
 
+import com.google.protobuf.Message;
+
 import java.lang.Thread;
+
+import com.leonc.zodiac.aquarius.base.util.Clock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,23 +29,36 @@ public class Server
     private static Log logger = LogFactory.getLog(Server.class);
 
     private Node owner = null;
-    private String id = "";
     private int port = 0;
     private boolean singleThread = false;
     private AtomicBoolean running = new AtomicBoolean();
 
     private ServerBootstrap bootstrap = null;
 
-    private ConcurrentHashMap<String, Service> services = new ConcurrentHashMap<String, Service>();
-    private ConcurrentLinkedQueue<Packet> pckQ = new ConcurrentLinkedQueue<Packet>();
+    private ServerConnListener connListener = null;
+    private ConcurrentHashMap<String, Channel> conns = new ConcurrentHashMap<String, Channel>();
 
-    public Server(Node owner, String id, int port) {
+    private ConcurrentHashMap<String, Service> services = new ConcurrentHashMap<String, Service>();
+    private ConcurrentLinkedQueue<Command> cmdQ = new ConcurrentLinkedQueue<Command>();
+
+    public Server(Node owner) {
         this.owner = owner;
-        this.id = id;
-        this.port = port;
     }
 
-    public synchronized void start(boolean singleThread) {
+    public ServerConnListener getConnListener() { return this.connListener; }
+
+    public Channel getChannel(String ip, int port) {
+        String addr = ip + ":" + port;
+        return conns.get(addr);
+    }
+
+    public synchronized void start(int port, 
+                                   ServerConnListener l,
+                                   boolean singleThread) {
+        this.port = port;
+        this.connListener = l;
+        this.singleThread = singleThread;
+
         ServerBootstrap bootstrap = new ServerBootstrap(
             new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
                                               Executors.newCachedThreadPool()));
@@ -52,7 +69,6 @@ public class Server
         this.bootstrap = bootstrap;
         this.running.set(true);
 
-        this.singleThread = singleThread;
         if(!singleThread) {
             Thread th = new Thread(new Dispatcher());
             th.start();
@@ -61,13 +77,18 @@ public class Server
 
     public synchronized void close() {
         this.running.set(false);
+
+        for(Channel ch : conns.values()) {
+            ch.close();
+        }
+        conns.clear();
+
         if(this.bootstrap != null) {
             this.bootstrap.releaseExternalResources();
             this.bootstrap = null;
         }
     }
 
-    public String getId() { return this.id; }
     public boolean getSingleThread() { return this.singleThread; }
 
     public void registerService(Service sv) {
@@ -77,60 +98,116 @@ public class Server
         services.putIfAbsent(name, sv);
     }
 
-    public void putPacket(Packet pck) {
-        if(pck == null) return;
-        pckQ.add(pck);
+    //used internal
+    public void putPacket(Packet pck, Channel ch) {
+        if(pck == null || ch == null) return;
+        try {
+            Command cmd = new Command(pck, ch);
+            cmdQ.add(cmd);
+        } catch(Exception ex) {
+            logger.error("create command exception:" + 
+                         "\n[service]" + pck.getServiceName() + 
+                         "\n[method]" + pck.getMethodName() +
+                         "\n[message]" + pck.getMessageName() +
+                         "\n[except]" + ex);
+        }
+    }
+
+    //used internal
+    public void nodeConnected(Channel ch) {
+        //if(!singleThread) 
+        {
+            if(this.connListener != null) {
+                handleNewconn(ch);
+            }
+        }
+    }
+
+    public void nodeDisconnected(Channel ch) {
+        //if(!singleThread) 
+        {
+            if(this.connListener != null) {
+                handleDisconn(ch);
+            }
+        }
     }
 
     //used in main thread when single thread
     public void dispatch() {
-        if(singleThread)
-            this.dispatchPacket();
-    }
-
-    private void dispatchPacket() {
-        while(true) {
-            if(!running.get()) break;
-
-            Packet pck = pckQ.poll();
-            if(pck == null) break;
-            
-            handlePacket(pck);
+        if(singleThread) {
+            //this.dispatchNewconns();
+            //this.dispatchDisconns();
+            this.dispatchCommand();
         }
     }
 
+    // private void dispatchNewconns() {
+    //     if(connListener == null) return;
+    //     while(true) {
+    //         Channel ch = newconns.poll();
+    //         if(ch == null) break;
+
+    //         handleNewconn(ch);
+    //     }
+    // }
+
+    // private void dispatchDisconns() {
+    //     if(connListener == null) return;
+    //     while(true) {
+    //         Channel ch = disconns.poll();
+    //         if(ch == null) break;
+
+    //         handleDisconn(ch);
+    //     }
+    // }
+
+    private void dispatchCommand() {
+        while(true) {
+            if(!running.get()) break;
+
+            Command cmd = cmdQ.poll();
+            if(cmd == null) break;
+            
+            handleCommand(cmd);
+        }
+    }
+
+    private void handleNewconn(Channel ch) {
+        InetSocketAddress addr = (InetSocketAddress)ch.getRemoteAddress();
+        this.connListener.nodeConnected(addr.getHostString(), addr.getPort());
+        this.conns.putIfAbsent(addr.getHostString() + ":" + addr.getPort(), ch);        
+    }
+
+    private void handleDisconn(Channel ch) {
+        InetSocketAddress addr = (InetSocketAddress)ch.getRemoteAddress();
+        String key = addr.getHostString() + ":" + addr.getPort();
+        Channel channel = this.conns.get(key);
+        if(channel == null) return;
+
+        this.connListener.nodeDisconnected(addr.getHostString(),
+                                           addr.getPort());
+        channel.close();
+        this.conns.remove(key);
+    }
+
     //this method may be called in multi-thread
-    private void handlePacket(Packet pck) {
-        if(pck == null) return;
+    private void handleCommand(Command cmd) {
         try {
-            Service sv = services.get(pck.getServiceName());
+            Service sv = services.get(cmd.getServiceName());
             if(sv == null) {
-                logger.info("service not exists:" + pck.getServiceName());
+                logger.info("service not exists:" + cmd.getServiceName());
                 return;
             }
 
-            Command cmd = new Command();
-            cmd.setRemoteId(pck.getSender());
-                    
-            cmd.setServiceName(pck.getServiceName());
-            cmd.setMethodName(pck.getMethodName());
-
-            String clsName = pck.getMessageName();
-            Class cls = Class.forName(clsName);
-            Method instance = cls.getDeclaredMethod("getDefaultInstance", null);
-            Message proto = (Message)instance.invoke(null, null);
-            Message msg = proto.newBuilderForType().mergeFrom(pck.getMessageData()).build();
-            cmd.setMessage(msg);
-
             Class clsService = sv.getClass();
-            Method handler = clsService.getDeclaredMethod(cmd.getMethodName(), Command.class);
+            Method handler = clsService.getDeclaredMethod(cmd.getMethodName(), 
+                                                          Command.class);
             handler.invoke(sv, cmd);
         } catch(Exception ex) {
-            logger.error("java pck handle exception:" + 
-                         "\n[service]" + pck.getServiceName() + 
-                         "\n[method]" + pck.getMethodName() +
-                         "\n[message]" + pck.getMessageName() +
-                         "\n[message data]" + pck.getMessageData() +
+            logger.error("java cmd handle exception:" + 
+                         "\n[service]" + cmd.getServiceName() + 
+                         "\n[method]" + cmd.getMethodName() +
+                         "\n[message]" + cmd.getMessage().getClass().getName() +
                          "\n[except]" + ex);
         }
     }
@@ -145,10 +222,10 @@ public class Server
                     while(true) {
                         if(!running.get()) break;
 
-                        Packet pck = pckQ.poll();
-                        if(pck == null) break;
+                        Command cmd = cmdQ.poll();
+                        if(cmd == null) break;
 
-                        threalPool.execute(new PacketHandler(pck));
+                        threalPool.execute(new CommandHandler(cmd));
                     }
                     if(!running.get()) break;
 
@@ -161,16 +238,15 @@ public class Server
             threalPool.shutdown();
         }
 
-        private class PacketHandler implements Runnable {
-            private Packet packet;
+        private class CommandHandler implements Runnable {
+            private Command cmd;
 
-            public PacketHandler(Packet pck) {
-                this.packet = pck;
+            public CommandHandler(Command cmd) {
+                this.cmd = cmd;
             }
 
             public void run() {
-                Packet pck = this.packet;
-                handlePacket(pck);
+                handleCommand(this.cmd);
             }
         }
     }

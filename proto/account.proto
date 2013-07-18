@@ -1,4 +1,4 @@
-package account;
+package proto.account;
 
 option java_package = "com.leonc.zodiac.aquarius.base.proto";
 option java_outer_classname = "ProtoAccount";

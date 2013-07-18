@@ -19,16 +19,26 @@ public class App
 
     private volatile boolean running = false;
     private Node node = null;
-    private NodeManager nodeMgr = null;
+    private PeerMgr peerMgr = null;
     private Properties sysConf = new Properties();
 
     private static Log logger = LogFactory.getLog(App.class);
 
     public Properties getSysConf() { return this.sysConf; }
     public Node getNode() { return this.node; }
-    public NodeManager getNodeMgr() { return this.nodeMgr; }
+    public PeerMgr getPeerMgr() { return this.peerMgr; }
 
     public void startup() {
+        this.start();
+        this.mainLoop();
+        this.close();
+    }
+
+    public void shutdown() {
+        this.running = false;
+    }
+
+    private void start() {
         System.out.println("master starting...");
         Properties conf = this.initSysConf();
         if(conf == null) return;
@@ -39,17 +49,17 @@ public class App
         this.createService(n);
         this.running = true;
 
-        this.nodeMgr = new NodeManager();
-        this.nodeMgr.start();
+        this.peerMgr = new PeerMgr();
+        this.peerMgr.start();
         System.out.println("master started");
+    }
 
-        this.mainLoop();
-
+    private void close() {
         System.out.println("master closing...");
         this.running = false;
-        if(this.nodeMgr != null) {
-            this.nodeMgr.close();
-            this.nodeMgr = null;
+        if(this.peerMgr != null) {
+            this.peerMgr.close();
+            this.peerMgr = null;
         }
         if(this.node != null) {
             this.node.close();
@@ -58,15 +68,11 @@ public class App
         System.out.println("master closed");
     }
 
-    public void shutdown() {
-        this.running = false;
-    }
-
     private void mainLoop() {
         while(this.running) {
             try {
                 long st = System.currentTimeMillis();
-                this.nodeMgr.update();
+                this.peerMgr.update();
                 long dt = System.currentTimeMillis() - st;
                 Thread.sleep(Global.FRAME_TIME - dt);
             } catch(Exception ex) {

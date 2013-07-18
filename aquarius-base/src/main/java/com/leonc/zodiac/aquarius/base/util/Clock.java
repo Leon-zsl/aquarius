@@ -8,7 +8,19 @@ public class Clock
     private long pretime;
     private long dttime;
 
+    private boolean running;
+
     public void start() {
+        reset();
+        running = true;
+    }
+
+    public void stop() {
+        reset();
+        running = false;
+    }
+
+    public void reset() {
         curtime = System.currentTimeMillis();
         pretime = System.currentTimeMillis();
         dttime = 0;
@@ -18,6 +30,8 @@ public class Clock
     public long deltaTime() { return dttime; }
 
     public void update() {
+        if(!running) return;
+
         curtime = System.currentTimeMillis();
         dttime = curtime - pretime;
         if(dttime < 0) {

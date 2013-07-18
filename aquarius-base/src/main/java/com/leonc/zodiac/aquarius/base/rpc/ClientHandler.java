@@ -5,18 +5,22 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.channel.ChannelStateEvent;
 
-public class PacketRouter extends SimpleChannelUpstreamHandler
-{
-    private Server owner;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-    public PacketRouter(Server owner) {
+public class ClientHandler extends SimpleChannelUpstreamHandler
+{
+    private static Log logger = LogFactory.getLog(ClientHandler.class);
+
+    private Client owner;
+
+    public ClientHandler(Client owner) {
         this.owner = owner;
     }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        if(owner != null)
-            owner.putPacket((Packet)e.getMessage(), ctx.getChannel());
+        logger.warn("client channel received msg:" + e.getMessage());
     }
 
     @Override

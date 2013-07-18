@@ -85,6 +85,7 @@ def build_account():
     path_util.copy_folder_type(srcdir, dstdir, ".jar")
 
 def build():
+    path_util.clear_folder_type(os.path.abspath("../release"), ".jar")
     build_base()
     build_master()
     build_gate()
@@ -95,6 +96,9 @@ def build():
     build_account()
 
 if __name__ == '__main__':
+    if arg == "all":
+        path_util.clear_folder_type(os.path.abspath("../release"), ".jar")
+
     for arg in sys.argv:
         if arg == 'base' or arg == 'all':
             build_base()
