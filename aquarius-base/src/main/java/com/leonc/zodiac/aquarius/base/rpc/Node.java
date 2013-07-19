@@ -17,11 +17,11 @@ public class Node
 
     private Server server = new Server(this);
     private Client client = new Client(this);
-    private PeerRouter router = new PeerRouter();
+    private NodeInfoMap router = new NodeInfoMap();
 
     public Server getServer() { return this.server; }
     public Client getClient() { return this.client; }
-    public PeerRouter getRouter() { return this.router; }
+    public NodeInfoMap getRouter() { return this.router; }
 
     public String getNodeId() { return this.nodeId; }
     public Node setNodeId(String id) {
@@ -34,20 +34,29 @@ public class Node
         this.nodeType = tp;
         return this;
     }
-    
-    public synchronized void start(int listenPort, 
-                                   ServerConnListener sl,
-                                   ClientConnListener cl) {
-        server.start(listenPort, sl, false);
-        client.start(cl);
+
+    public Node setServerConnListener(ServerConnListener l) {
+        this.server.setConnListener(l);
+        return this;
+    }
+
+    public Node setClientConnListener(ClientConnListener l) {
+        this.client.setConnListener(l);
+        return this;
+    }
+
+    public String getListenIp() { return this.server.getListenIp(); }
+    public int getListenPort() { return this.server.getListenPort(); }
+
+    public synchronized void start(int listenPort) {
+        server.start(listenPort, false);
+        client.start();
     }
 
     public synchronized void start(int listenPort, 
-                                   ServerConnListener sl,
-                                   ClientConnListener cl,
                                    boolean singleThread) {
-        server.start(listenPort, sl, singleThread);
-        client.start(cl);
+        server.start(listenPort, singleThread);
+        client.start();
     }
 
     public synchronized void close() {
@@ -55,40 +64,9 @@ public class Node
         this.client.close();
     }
 
-    public String getPeerType(String nodeId) {
-        return this.router.getNodeType(nodeId);
-    }
-
-    public void setPeerType(String nodeId, String nodeType) {
-        this.router.registerNodeType(nodeId, nodeType);
-    }
-
-    public String getPeerServerIp(String nodeId) {
-        return this.router.getServerIp(nodeId);
-    }
-
-    public int getPeerServerPort(String nodeId) {
-        return this.router.getServerPort(nodeId);
-    }
-
-    public void setPeerServerAddr(String nodeId, String ip, int port) {
-        this.router.registerServerAddr(nodeId, ip, port);
-    }
-
-    public String getPeerClientIp(String nodeId) {
-        return this.router.getClientIp(nodeId);
-    }
-
-    public int getPeerClientPort(String nodeId) {
-        return this.router.getClientPort(nodeId);
-    }
-
-    public void setPeerClientAddr(String nodeId, String ip, int port) {
-        this.router.registerClientAddr(nodeId, ip, port);
-    }
-
-    public void registerService(Service sv) {
+    public Node registerService(Service sv) {
         this.server.registerService(sv);
+        return this;
     }
 
     public void connectToNode(String ip, int port) {
@@ -97,10 +75,6 @@ public class Node
 
     public void disconnectFromNode(String ip, int port) {
         this.client.disconnect(ip, port);
-    }
-
-    public void broadcast(String serviceName, String methodName, Message msg) {
-        this.client.broadcast(serviceName, methodName, msg);
     }
 
     public void remoteCall(String serverIp, int serverPort, String serviceName,
@@ -112,12 +86,26 @@ public class Node
                            Message msg) {
         String addr = this.router.getServerAddr(nodeId);
         if(addr.equals("")) {
-            logger.warn("can not find server addr for nodeId" + nodeId);
+            logger.warn("can not find server addr for nodeId:" + nodeId);
             return;
         }
         String ip = this.router.ipFromAddr(addr);
         int port = this.router.portFromAddr(addr);
         this.remoteCall(ip, port, serviceName, methodName, msg);
+    }
+
+    public void response(String clientIp, int clientPort, String serviceName,
+                         String methodName, Message msg) {
+        String nodeId = this.router.getNodeIdFromClientAddr(clientIp, clientPort);
+        if(nodeId == null || nodeId.equals("")) {
+            logger.warn("can not find nodeid for client addr:" + clientIp + ":" + clientPort);
+            return;
+        }
+        this.remoteCall(nodeId, serviceName, methodName, msg);
+    }
+
+    public void broadcast(String serviceName, String methodName, Message msg) {
+        this.client.broadcast(serviceName, methodName, msg);
     }
 
     public void broadcastToOthers(String excludeIp, int exludedPort,

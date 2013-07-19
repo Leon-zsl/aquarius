@@ -29,11 +29,14 @@ public class Server
     private static Log logger = LogFactory.getLog(Server.class);
 
     private Node owner = null;
-    private int port = 0;
+    private String listenIp = "";
+    private int listenPort = 0;
+
     private boolean singleThread = false;
     private AtomicBoolean running = new AtomicBoolean();
 
     private ServerBootstrap bootstrap = null;
+    private Channel serverChannel = null;
 
     private ServerConnListener connListener = null;
     private ConcurrentHashMap<String, Channel> conns = new ConcurrentHashMap<String, Channel>();
@@ -46,29 +49,42 @@ public class Server
     }
 
     public ServerConnListener getConnListener() { return this.connListener; }
+    public Server setConnListener(ServerConnListener l) {
+        this.connListener = l;
+        return this;
+    }
 
-    public Channel getChannel(String ip, int port) {
-        String addr = ip + ":" + port;
+    public Channel[] getConnChannels() {
+        return conns.values().toArray(new Channel[0]);
+    }
+
+    public Channel getConnChannel(String remoteIp, int remotePort) {
+        String addr = remotePort + ":" + remotePort;
         return conns.get(addr);
     }
 
-    public synchronized void start(int port, 
-                                   ServerConnListener l,
-                                   boolean singleThread) {
-        this.port = port;
-        this.connListener = l;
-        this.singleThread = singleThread;
+    public String getListenIp() { return this.listenIp; }
+    public int getListenPort() { return this.listenPort; }
+    public Channel getServerChannel() {
+        return this.serverChannel;
+    }
 
+    public synchronized void start(int port, 
+                                   boolean singleThread) {
         ServerBootstrap bootstrap = new ServerBootstrap(
             new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
                                               Executors.newCachedThreadPool()));
 
         bootstrap.setPipelineFactory(new ServerPipelineFactory(this));
-        bootstrap.bind(new InetSocketAddress(port));
+        Channel ch = bootstrap.bind(new InetSocketAddress(port));
 
+        InetSocketAddress addr = (InetSocketAddress)ch.getLocalAddress();
+        this.listenIp = addr.getHostString();
+        this.listenPort = addr.getPort();
         this.bootstrap = bootstrap;
-        this.running.set(true);
 
+        this.running.set(true);
+        this.singleThread = singleThread;
         if(!singleThread) {
             Thread th = new Thread(new Dispatcher());
             th.start();

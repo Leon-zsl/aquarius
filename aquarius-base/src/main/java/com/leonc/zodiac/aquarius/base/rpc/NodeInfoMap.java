@@ -4,49 +4,70 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.Integer;
 
-public class PeerRouter
+public class NodeInfoMap
 {
-    private ConcurrentHashMap<String, PeerInfo> peerMap = new ConcurrentHashMap<String, PeerInfo>();
-    
-    public void registerServerAddr(String nodeId, String ip, int port) {
+    private ConcurrentHashMap<String, NodeInfo> nodeMap = new ConcurrentHashMap<String, NodeInfo>();
+
+    public NodeInfoMap unregisterNode(String nodeId) {
+        nodeMap.remove(nodeId);
+        return this;
+    }
+
+    public NodeInfoMap registerServerAddr(String nodeId, String ip, int port) {
         String addr = ip + ":" + port;
         registerServerAddr(nodeId, addr);
+        return this;
     }
 
-    public void registerClientAddr(String nodeId, String ip, int port) {
+    public NodeInfoMap registerClientAddr(String nodeId, String ip, int port) {
         String addr = ip + ":" + port;
         registerClientAddr(nodeId, addr);
+        return this;
     }
 
-    public synchronized void registerServerAddr(String nodeId, String addr) {
-        PeerInfo info = peerMap.get(nodeId);
+    public synchronized NodeInfoMap registerServerAddr(String nodeId, String addr) {
+        NodeInfo info = nodeMap.get(nodeId);
         if(info == null) {
-            info = new PeerInfo();
-            peerMap.putIfAbsent(nodeId, info);
+            info = new NodeInfo();
+            nodeMap.putIfAbsent(nodeId, info);
         }
         info.serverAddr = addr;
+
+        return this;
     }
 
-    public synchronized void registerClientAddr(String nodeId, String addr) {
-        PeerInfo info = peerMap.get(nodeId);
+    public synchronized NodeInfoMap registerClientAddr(String nodeId, String addr) {
+        NodeInfo info = nodeMap.get(nodeId);
         if(info == null) {
-            info = new PeerInfo();
-            peerMap.putIfAbsent(nodeId, info);
+            info = new NodeInfo();
+            nodeMap.putIfAbsent(nodeId, info);
         }
         info.clientAddr = addr;
+
+        return this;
     }
 
-    public synchronized void registerNodeType(String nodeId, String nodeType) {
-        PeerInfo info = peerMap.get(nodeId);
+    public synchronized NodeInfoMap registerNodeType(String nodeId, String nodeType) {
+        NodeInfo info = nodeMap.get(nodeId);
         if(info == null) {
-            info = new PeerInfo();
-            peerMap.putIfAbsent(nodeId, info);
+            info = new NodeInfo();
+            nodeMap.putIfAbsent(nodeId, info);
         }
         info.nodeType = nodeType;
+
+        return this;
+    }
+
+    public String[] getNodeIds() {
+        return nodeMap.keySet().toArray(new String[0]);
+    }
+    
+    public NodeInfo[] getNodeInfos() {
+        return nodeMap.values().toArray(new NodeInfo[0]);
     }
 
     public String getNodeIdFromServerAddr(String addr) {
-        for(PeerInfo info : peerMap.values()) {
+        for(NodeInfo info : nodeMap.values()) {
             if(info.serverAddr.equals(addr))
                 return info.nodeId;
         }
@@ -60,7 +81,7 @@ public class PeerRouter
     }
 
     public String getNodeIdFromClientAddr(String addr) {
-        for(PeerInfo info : peerMap.values()) {
+        for(NodeInfo info : nodeMap.values()) {
             if(info.clientAddr.equals(addr))
                 return info.nodeId;
         }
@@ -74,7 +95,7 @@ public class PeerRouter
 
     public String[] getNodeIdsFromNodeType(String nodeType) {
         ArrayList<String> list = new ArrayList<String>();
-        for(PeerInfo info : peerMap.values()) {
+        for(NodeInfo info : nodeMap.values()) {
             if(info.nodeType.equals(nodeType))
                 list.add(info.nodeId);
         }
@@ -82,13 +103,13 @@ public class PeerRouter
     }
 
     public String getNodeType(String nodeId) {
-        PeerInfo info = peerMap.get(nodeId);
+        NodeInfo info = nodeMap.get(nodeId);
         if(info == null) return "";
         return info.nodeType;
     }
 
     public String getServerAddr(String nodeId) {
-        PeerInfo info = peerMap.get(nodeId);
+        NodeInfo info = nodeMap.get(nodeId);
         if(info == null) return "";
         return info.serverAddr;
     }
@@ -118,7 +139,7 @@ public class PeerRouter
     }
 
     public String getClientAddr(String nodeId) {
-        PeerInfo info = peerMap.get(nodeId);
+        NodeInfo info = nodeMap.get(nodeId);
         if(info == null) return "";
         return info.clientAddr;
     }

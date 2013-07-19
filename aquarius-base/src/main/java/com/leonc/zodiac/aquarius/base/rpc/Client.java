@@ -31,15 +31,18 @@ public final class Client
     }
 
     public ClientConnListener getConnListener() { return this.connListener; }
+    public Client setConnListener(ClientConnListener l) {
+        this.connListener = l;
+        return this;
+    }
 
-    public Channel getChannel(String ip, int port) {
-        String addr = ip + ":" + port;
+    public Channel getChannel(String remoteIp, int remotePort) {
+        String addr = remoteIp + ":" + remotePort;
         return conns.get(addr);
     }
 
-    public synchronized void start(ClientConnListener l) {
+    public synchronized void start() {
         logger.info("start client...");
-        this.connListener = l;
         ClientBootstrap bootstrap = new ClientBootstrap(
             new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
                                               Executors.newCachedThreadPool()));

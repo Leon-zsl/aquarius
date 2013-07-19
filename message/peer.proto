@@ -7,15 +7,35 @@ option java_outer_classname = "MsgPeer";
 
 option optimize_for = SPEED;
 
+message PeerRegister {
+    optional string nodeType = 1;
+    optional string listenIp = 2;
+    optional int32 listenPort = 3;
+}
+
+message PeerRegisterResponse
+{
+    optional common.ResponseStatus status = 1;
+    optional string nodeId = 2;
+}
+
+message PeerUnRegister {
+    //no msg body
+}
+
 message PeerInfo
 {
     optional string nodeId = 1;
     optional string nodeType = 2;
-    optional string ip = 3;
-    optional int32 port = 4;
+    optional string listenIp = 3;
+    optional int32 listenPort = 4;
 }
 
-message PeerInfoList
-{
-    repeated PeerInfo peerList = 1;
+message FetchPeerList {
+    //no msg body
+}
+
+message FetchPeerListResponse {
+    optional common.ResponseStatus status = 1;
+    repeated PeerInfo peerList = 2;
 }

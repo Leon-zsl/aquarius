@@ -21,7 +21,7 @@ message DoubleMsg { required double value = 1; }
 
 message BytesMsg { required bytes value = 1; }
 
-message BaseResponse {
+message ResponseStatus {
     optional int32 errCode = 1;
     optional string errMsg = 2;
 }
