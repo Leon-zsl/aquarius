@@ -15,7 +15,8 @@ public class PacketEncoder extends OneToOneEncoder
 
     @Override
     protected Object encode(ChannelHandlerContext ctx, Channel ch, Object msg) throws Exception {
-        if(!(msg instanceof Packet)) {
+        logger.info("write data...");
+    	if(!(msg instanceof Packet)) {
             logger.error("encode data is not packet");
             return msg;
         }

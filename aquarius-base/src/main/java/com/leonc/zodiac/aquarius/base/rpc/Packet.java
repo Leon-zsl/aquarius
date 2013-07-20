@@ -101,7 +101,7 @@ public class Packet {
 	
 	        len = buf.readShort();
 	        tmp = new byte[len];
-	        buf.readBytes(len);
+	        buf.readBytes(tmp);
 	        this.serviceName = new String(tmp, set);
 
             len = buf.readShort();

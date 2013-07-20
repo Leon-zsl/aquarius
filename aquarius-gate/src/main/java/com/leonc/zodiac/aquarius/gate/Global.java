@@ -1,4 +1,4 @@
-package com.leonc.zodiac.aquarius.master;
+package com.leonc.zodiac.aquarius.gate;
 
 public final class Global
 {

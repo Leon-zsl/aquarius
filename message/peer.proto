@@ -16,12 +16,17 @@ message PeerRegister {
 message PeerRegisterResponse
 {
     optional common.ResponseStatus status = 1;
-    optional string nodeId = 2;
+    optional string yourNodeId = 2;
+    optional string myNodeId = 3;
 }
 
 message PeerUnRegister {
     //no msg body
 }
+
+// message PeerUnRegisterResponse {
+//     //no msg body
+// }
 
 message PeerInfo
 {
@@ -37,5 +42,21 @@ message FetchPeerList {
 
 message FetchPeerListResponse {
     optional common.ResponseStatus status = 1;
-    repeated PeerInfo peerList = 2;
+    repeated PeerInfo peer = 2;
 }
+
+message PeerJoin {
+    optional PeerInfo info = 1;
+}
+
+message PeerJoinResponse {
+    optional string nodeId = 1;
+}
+
+message PeerLeave {
+    //no msg body
+}
+
+// message PeerQuitResponse {
+//     //no msg body
+// }

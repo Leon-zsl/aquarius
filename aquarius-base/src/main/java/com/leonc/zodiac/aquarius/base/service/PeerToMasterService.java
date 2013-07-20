@@ -1,6 +1,4 @@
-package com.leonc.zodiac.aquarius.master.service;
-
-import com.google.protobuf.Message;
+package com.leonc.zodiac.aquarius.base.service;
 
 import com.leonc.zodiac.aquarius.base.rpc.Service;
 import com.leonc.zodiac.aquarius.base.rpc.Command;
@@ -9,8 +7,6 @@ import com.leonc.zodiac.aquarius.base.rpc.NodeInfo;
 import com.leonc.zodiac.aquarius.base.rpc.NodeInfoMap;
 import com.leonc.zodiac.aquarius.base.message.MsgPeer;
 
-import com.leonc.zodiac.aquarius.master.App;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,17 +14,16 @@ public class PeerToMasterService implements Service
 {
     private static Log logger = LogFactory.getLog(PeerToMasterService.class);
 
-    public void register(Command cmd) {
-        Message msg = cmd.getMessage();
-        if(!(msg instanceof MsgPeer.PeerRegister)) {
-            logger.info("register message is illeagal format");
-            return;
-        }
+    private Node node;
 
-        Node node = App.getInstance().getNode();
+    public PeerToMasterService(Node n) {
+        this.node = n;
+    }
+
+    public void register(Command cmd) {
         NodeInfoMap router = node.getRouter();
 
-        MsgPeer.PeerRegister req = (MsgPeer.PeerRegister)msg;
+        MsgPeer.PeerRegister req = (MsgPeer.PeerRegister)cmd.getMessage();
         String nodeType = req.getNodeType();
         String listenIp = req.getListenIp();
         int listenPort = req.getListenPort();
@@ -49,28 +44,29 @@ public class PeerToMasterService implements Service
         node.connectToNode(listenIp, listenPort);
 
         //response to peer
-        MsgPeer.PeerRegisterResponse rsp = MsgPeer.PeerRegisterResponse.newBuilder().setNodeId(nodeId).build();
+        MsgPeer.PeerRegisterResponse rsp = MsgPeer.PeerRegisterResponse.newBuilder().
+            setYourNodeId(nodeId).setMyNodeId(node.getNodeId()).build();
         node.remoteCall(nodeId, "MasterToPeerService", "registerRepsonse", rsp);
     }
 
     public void unregister(Command cmd) {
-        Node node = App.getInstance().getNode();
-        NodeInfoMap router = node.getRouter();
+        //we listen the disconnect event
+
+        // Node node = App.getInstance().getNode();
         
-        String nodeId = router.getNodeIdFromClientAddr(cmd.getRemoteIp(), 
-                                                       cmd.getRemotePort());
+        // String nodeId = router.getNodeIdFromClientAddr(cmd.getRemoteIp(), 
+        //                                                cmd.getRemotePort());
 
-        //disconnect 
-        String listenIp = router.getServerIp(nodeId);
-        int listenPort = router.getServerPort(nodeId);
-        node.disconnectFromNode(listenIp, listenPort);
+        // //disconnect 
+        // String listenIp = router.getServerIp(nodeId);
+        // int listenPort = router.getServerPort(nodeId);
+        // node.disconnectFromNode(listenIp, listenPort);
 
-        //remove from router map
-        router.unregisterNode(nodeId);
+        // //remove from router map
+        // router.unregisterNode(nodeId);
     }
 
     public void fetchNodeList(Command cmd) {
-        Node node = App.getInstance().getNode();
         NodeInfoMap router = node.getRouter();
         NodeInfo[] infos = router.getNodeInfos();
 
@@ -80,7 +76,7 @@ public class PeerToMasterService implements Service
                 setNodeId(info.nodeId).setNodeType(info.nodeType).
                 setListenIp(router.ipFromAddr(info.serverAddr)).
                 setListenPort(router.portFromAddr(info.serverAddr)).build();
-            bd.addPeerList(pi);
+            bd.addPeer(pi);
         }
 
         node.response(cmd.getRemoteIp(), cmd.getRemotePort(),

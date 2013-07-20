@@ -2,8 +2,8 @@ package com.leonc.zodiac.aquarius.master;
 
 import com.leonc.zodiac.aquarius.base.rpc.Node;
 import com.leonc.zodiac.aquarius.base.AquariusException;
-import com.leonc.zodiac.aquarius.base.rpc.ClientConnListener;
-import com.leonc.zodiac.aquarius.base.rpc.ServerConnListener;
+import com.leonc.zodiac.aquarius.base.service.DefaultClientConnListener;
+import com.leonc.zodiac.aquarius.base.service.DefaultServerConnListener;
 import com.leonc.zodiac.aquarius.master.service.ServiceBuilder;
 
 import java.lang.Thread;
@@ -16,26 +16,6 @@ import org.apache.commons.logging.LogFactory;
 
 public class App 
 {
-    public class ClientConnListenerImpl implements ClientConnListener {
-        public void nodeConnected(String ip, int port) {
-            logger.info("connect finished:" + ip + ":" + port);
-        }
-
-        public void nodeDisconnected(String ip, int port) {
-            logger.info("disconnect finished:" + ip + ":" + port);
-        }
-    }
-
-    public class ServerConnListenerImpl implements ServerConnListener {
-        public void nodeConnected(String ip, int port) {
-            logger.info("new node connected:" + ip + ":" + port);
-        }
-
-        public void nodeDisconnected(String ip, int port) {
-            logger.info("node disconnected: " + ip + ":" + port);
-        }
-    }
-
     private static App instance = new App();
     public static App getInstance() { return instance; }
 
@@ -59,11 +39,11 @@ public class App
     }
 
     private void start() {
-        System.out.println("master starting...");
+        logger.info("master starting...");
 
         Properties conf = this.initSysConf();
         if(conf == null) {
-            logger.info("init sys conf failed");
+            logger.error("init sys conf failed");
             return;
         }
 
@@ -76,18 +56,18 @@ public class App
         this.createService(n);
         this.running = true;
 
-        System.out.println("master started");
+        logger.info("master started");
     }
 
     private void close() {
-        System.out.println("master closing...");
+        logger.info("master closing...");
         this.running = false;
 
         if(this.node != null) {
             this.node.close();
             this.node = null;
         }
-        System.out.println("master closed");
+        logger.info("master closed");
     }
 
     private void mainLoop() {
@@ -126,8 +106,8 @@ public class App
         int port = Integer.parseInt(conf.getProperty("listen_port"));
 
         this.node.setNodeId(nodeid).setNodeType(nodetype);
-        this.node.setServerConnListener(new ServerConnListenerImpl());
-        this.node.setClientConnListener(new ClientConnListenerImpl());
+        this.node.setServerConnListener(new DefaultServerConnListener(this.node));
+        this.node.setClientConnListener(new DefaultClientConnListener(this.node));
         this.node.start(port);
 
         return this.node;

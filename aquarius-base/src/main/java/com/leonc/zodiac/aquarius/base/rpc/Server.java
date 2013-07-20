@@ -59,8 +59,18 @@ public class Server
     }
 
     public Channel getConnChannel(String remoteIp, int remotePort) {
-        String addr = remotePort + ":" + remotePort;
+        String addr = remoteIp + ":" + remotePort;
         return conns.get(addr);
+    }
+
+    public void closeConn(String remoteIp, int remotePort) {
+        Channel ch = getConnChannel(remoteIp, remotePort);
+        if(ch == null) return;
+        
+        InetSocketAddress sock = (InetSocketAddress)ch.getRemoteAddress();
+        String addr = sock.getHostString() + ":" + sock.getPort();
+        ch.close();
+        conns.remove(addr);
     }
 
     public String getListenIp() { return this.listenIp; }

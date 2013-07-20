@@ -69,12 +69,12 @@ public class Node
         return this;
     }
 
-    public void connectToNode(String ip, int port) {
-        this.client.connect(ip, port);
+    public void connectToNode(String serverIp, int serverPort) {
+        this.client.connect(serverIp, serverPort);
     }
 
-    public void disconnectFromNode(String ip, int port) {
-        this.client.disconnect(ip, port);
+    public void disconnectFromNode(String serverIp, int serverPort) {
+        this.client.disconnect(serverIp, serverPort);
     }
 
     public void remoteCall(String serverIp, int serverPort, String serviceName,
