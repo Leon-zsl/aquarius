@@ -46,7 +46,7 @@ public class PeerToMasterService implements Service
         //response to peer
         MsgPeer.PeerRegisterResponse rsp = MsgPeer.PeerRegisterResponse.newBuilder().
             setYourNodeId(nodeId).setMyNodeId(node.getNodeId()).build();
-        node.remoteCall(nodeId, "MasterToPeerService", "registerRepsonse", rsp);
+        node.remoteCall(nodeId, "MasterToPeerService", "registerResponse", rsp);
     }
 
     public void unregister(Command cmd) {

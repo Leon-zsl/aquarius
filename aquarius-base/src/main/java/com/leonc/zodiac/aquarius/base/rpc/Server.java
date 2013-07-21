@@ -79,14 +79,14 @@ public class Server
         return this.serverChannel;
     }
 
-    public synchronized void start(int port, 
+    public synchronized void start(String ip, int port, 
                                    boolean singleThread) {
         ServerBootstrap bootstrap = new ServerBootstrap(
             new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
                                               Executors.newCachedThreadPool()));
 
         bootstrap.setPipelineFactory(new ServerPipelineFactory(this));
-        Channel ch = bootstrap.bind(new InetSocketAddress(port));
+        Channel ch = bootstrap.bind(new InetSocketAddress(ip, port));
 
         InetSocketAddress addr = (InetSocketAddress)ch.getLocalAddress();
         this.listenIp = addr.getHostString();

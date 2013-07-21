@@ -45,7 +45,8 @@ public class MasterToPeerService implements Service
 
         for(int i = 0; i < cnt; ++i) {
             MsgPeer.PeerInfo info = rsp.getPeer(i);
-
+            if(info.getNodeId().equals(node.getNodeId()))
+            	continue;
             router.registerNodeType(info.getNodeId(), 
                                     info.getNodeType()).
                 registerServerAddr(info.getNodeId(), 

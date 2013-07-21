@@ -1,5 +1,6 @@
 package com.leonc.zodiac.aquarius.base.rpc;
 
+import java.net.InetAddress;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.ArrayList;
 
@@ -49,13 +50,18 @@ public class Node
     public int getListenPort() { return this.server.getListenPort(); }
 
     public synchronized void start(int listenPort) {
-        server.start(listenPort, false);
-        client.start();
+    	try {
+    		String ip = InetAddress.getLocalHost().getHostAddress();
+    		server.start(ip, listenPort, false);
+    		client.start();
+    	} catch(Exception ex) {
+    		logger.error("exception: " + ex);
+    	}
     }
 
-    public synchronized void start(int listenPort, 
+    public synchronized void start(String listenIp, int listenPort, 
                                    boolean singleThread) {
-        server.start(listenPort, singleThread);
+        server.start(listenIp, listenPort, singleThread);
         client.start();
     }
 

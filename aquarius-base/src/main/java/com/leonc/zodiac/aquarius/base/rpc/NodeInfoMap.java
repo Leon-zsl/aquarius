@@ -29,6 +29,7 @@ public class NodeInfoMap
         NodeInfo info = nodeMap.get(nodeId);
         if(info == null) {
             info = new NodeInfo();
+            info.nodeId = nodeId;
             nodeMap.putIfAbsent(nodeId, info);
         }
         info.serverAddr = addr;
@@ -40,6 +41,7 @@ public class NodeInfoMap
         NodeInfo info = nodeMap.get(nodeId);
         if(info == null) {
             info = new NodeInfo();
+            info.nodeId = nodeId;
             nodeMap.putIfAbsent(nodeId, info);
         }
         info.clientAddr = addr;
@@ -51,6 +53,7 @@ public class NodeInfoMap
         NodeInfo info = nodeMap.get(nodeId);
         if(info == null) {
             info = new NodeInfo();
+            info.nodeId = nodeId;
             nodeMap.putIfAbsent(nodeId, info);
         }
         info.nodeType = nodeType;
