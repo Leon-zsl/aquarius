@@ -23,6 +23,7 @@ public class App
     private volatile boolean running = false;
     private Node node = new Node();
     private Properties sysConf = new Properties();
+    private DBConnPool dbPool = new DBConnPool();
 
     private static Log logger = LogFactory.getLog(App.class);
 
@@ -48,12 +49,18 @@ public class App
             return;
         }
 
+        DBConnPool p = this.startDBPool(conf);
+        if(p == null) {
+            logger.error("start db pool failed");
+            return;
+        }
+        
         Node n = this.startNode(conf);
         if(n == null) {
             logger.error("start node module failed");
             return;
         }
-        
+
         this.createService(n);
         this.running = true;
 
@@ -66,10 +73,9 @@ public class App
         logger.info("db closing...");
         this.running = false;
 
-        if(this.node != null) {
-            this.node.close();
-            this.node = null;
-        }
+        this.node.close();
+        this.dbPool.close();
+
         logger.info("db closed");
     }
 
@@ -112,6 +118,17 @@ public class App
         this.node.start(port);
 
         return this.node;
+    }
+
+    private DBConnPool startDBPool(Properties conf) {
+        String url = conf.getProperty("db_url");
+        String name = conf.getProperty("db_name");
+        String account = conf.getProperty("db_account");
+        String pwd = conf.getProperty("db_pwd");
+        int size = Integer.parseInt(conf.getProperty("db_pool_size"));
+        
+        this.dbPool.start(size, url, name, account, pwd);
+        return this.dbPool;
     }
 
     private void createService(Node n) {

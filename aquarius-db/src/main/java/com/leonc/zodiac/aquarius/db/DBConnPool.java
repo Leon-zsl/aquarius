@@ -76,8 +76,7 @@ public final class DBConnPool
 		try {
 			Connection conn = DriverManager.getConnection(this.dbUrl);
             conn.setAutoCommit(true);
-            logger.info("connection count:" + this.conns.size());
-			return conn;
+ 			return conn;
 		} catch(SQLException ex) {
 			logger.error("create db connection failed");
 			return null;
