@@ -8,18 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import java.net.InetSocketAddress;
 import java.lang.reflect.*;
 import java.lang.Class;
 
-import com.google.protobuf.Message;
-
 import java.lang.Thread;
-
-import com.leonc.zodiac.aquarius.base.util.Clock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +23,6 @@ public class Server
 {
     private static Log logger = LogFactory.getLog(Server.class);
 
-    private Node owner = null;
     private String listenIp = "";
     private int listenPort = 0;
 
@@ -43,10 +37,6 @@ public class Server
 
     private ConcurrentHashMap<String, Service> services = new ConcurrentHashMap<String, Service>();
     private ConcurrentLinkedQueue<Command> cmdQ = new ConcurrentLinkedQueue<Command>();
-
-    public Server(Node owner) {
-        this.owner = owner;
-    }
 
     public ServerConnListener getConnListener() { return this.connListener; }
     public Server setConnListener(ServerConnListener l) {

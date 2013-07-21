@@ -20,17 +20,12 @@ public final class Client
 {
     private static Log logger = LogFactory.getLog(Client.class);
 
-    private Node owner = null;
     private ClientBootstrap bootstrap = null;
 
     private ClientConnListener connListener = null;
     private ConcurrentHashMap<String, Channel> conns = new ConcurrentHashMap<String, Channel>();
     //remote server channel addr -> remote listen addr
     private ConcurrentHashMap<String, String> addrMap = new ConcurrentHashMap<String, String>();
-
-    public Client(Node owner) {
-        this.owner = owner;
-    }
 
     public ClientConnListener getConnListener() { return this.connListener; }
     public Client setConnListener(ClientConnListener l) {

@@ -1,8 +1,6 @@
 package com.leonc.zodiac.aquarius.chat;
 
 import com.leonc.zodiac.aquarius.base.rpc.Node;
-import com.leonc.zodiac.aquarius.base.rpc.NodeInfoMap;
-import com.leonc.zodiac.aquarius.base.AquariusException;
 import com.leonc.zodiac.aquarius.base.service.DefaultClientConnListener;
 import com.leonc.zodiac.aquarius.base.service.DefaultServerConnListener;
 import com.leonc.zodiac.aquarius.base.message.MsgPeer;

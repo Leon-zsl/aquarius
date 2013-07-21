@@ -1,8 +1,6 @@
 package com.leonc.zodiac.aquarius.base.rpc;
 
 import java.net.InetAddress;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.ArrayList;
 
 import com.google.protobuf.Message;
 
@@ -16,8 +14,8 @@ public class Node
     private String nodeId = "";
     private String nodeType = "";
 
-    private Server server = new Server(this);
-    private Client client = new Client(this);
+    private Server server = new Server();
+    private Client client = new Client();
     private NodeInfoMap router = new NodeInfoMap();
 
     public Server getServer() { return this.server; }
