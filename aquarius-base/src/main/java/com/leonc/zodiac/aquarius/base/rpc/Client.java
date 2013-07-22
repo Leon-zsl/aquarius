@@ -111,17 +111,18 @@ public final class Client
     }
 
     public void nodeDisconnected(Channel ch) {
-        if(this.connListener == null) return;
-
         InetSocketAddress chsock = (InetSocketAddress)ch.getRemoteAddress();
         String chaddr = chsock.getHostString() + ":" + chsock.getPort();
         String addr = addrMap.get(chaddr);
+        
         Channel channel = this.conns.get(addr);
         if(channel == null) return;
-
-        String[] info = addr.split(":");
-        this.connListener.nodeDisconnected(info[0], Integer.parseInt(info[1]));
-
+        
+        if(this.connListener != null) {
+        	String[] info = addr.split(":");
+        	this.connListener.nodeDisconnected(info[0], Integer.parseInt(info[1]));
+        }
+        
         channel.close();
         this.conns.remove(addr);
         this.addrMap.remove(chaddr);

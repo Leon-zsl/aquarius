@@ -107,6 +107,7 @@ public class App
         this.node.setNodeId(nodeid).setNodeType(nodetype);
         this.node.setServerConnListener(new DefaultServerConnListener(this.node));
         this.node.setClientConnListener(new DefaultClientConnListener(this.node));
+        //this.node.start("127.0.0.1", port, false);
         this.node.start(port);
 
         return this.node;

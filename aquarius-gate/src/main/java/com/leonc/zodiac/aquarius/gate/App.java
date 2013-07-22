@@ -22,11 +22,13 @@ public class App
     private volatile boolean running = false;
     private Node node = new Node();
     private Properties sysConf = new Properties();
+    private Acceptor acceptor = new Acceptor();
 
     private static Log logger = LogFactory.getLog(App.class);
 
     public Properties getSysConf() { return this.sysConf; }
     public Node getNode() { return this.node; }
+    public Acceptor getAcceptor() { return this.acceptor; }
 
     public void startup() {
         this.start();
@@ -41,6 +43,8 @@ public class App
     private void start() {
         logger.info("gate starting...");
 
+        this.running = true;
+        
         Properties conf = this.initSysConf();
         if(conf == null) {
             logger.error("init sys conf failed");
@@ -53,22 +57,28 @@ public class App
             return;
         }
         
-        this.createService(n);
-        this.running = true;
+        this.createService();
 
         this.connectToMaster(conf);
+        this.startAccept(conf);
 
         logger.info("gate started");
     }
 
     private void close() {
         logger.info("gate closing...");
-        this.running = false;
 
+        if(this.acceptor != null) {
+        	this.acceptor.close();
+        	//this.acceptor = null;
+        }
+        
         if(this.node != null) {
             this.node.close();
-            this.node = null;
+            //this.node = null;
         }
+        
+        this.running = false;
         logger.info("gate closed");
     }
 
@@ -113,8 +123,8 @@ public class App
         return this.node;
     }
 
-    private void createService(Node n) {
-        ServiceBuilder.build(n);
+    private void createService() {
+        ServiceBuilder.build(this);
     }
 
     private void connectToMaster(Properties conf) {
@@ -133,5 +143,10 @@ public class App
             setListenPort(this.node.getListenPort()).build();
         this.node.remoteCall(masterIp, masterPort, "PeerToMasterService",
                              "register", req);
+    }
+    
+    private void startAccept(Properties conf) {
+    	int port = Integer.parseInt(conf.getProperty("acceptor_port"));
+    	this.acceptor.start(port);
     }
 }

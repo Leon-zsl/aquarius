@@ -1,0 +1,35 @@
+package message.packet;
+
+option java_package = "com.leonc.zodiac.aquarius.base.message";
+option java_outer_classname = "MsgPacketForward";
+
+option optimize_for = SPEED;
+
+message Packet {
+    optional int32 opcode = 1;
+    optional bytes data = 2;
+}
+
+message C2SPacket {
+    optional string sid = 1;
+    optional Packet packet = 2;
+}
+
+message S2CPacket {
+    optional string sid = 1;
+    optional Packet packet = 2;
+}
+
+message S2MPacket {
+    repeated string sid = 1;
+    optional Packet packet = 2;
+}
+
+message S2APacket {
+    optional Packet packet = 1;
+}
+
+message PlayerToServer {
+    optional string sid = 1;
+    optional string nodeId = 2;
+}

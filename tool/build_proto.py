@@ -3,6 +3,7 @@
 import os
 import os.path
 import path_util
+import parse_proto
 
 SRC_DIR = "../proto"
 INC_DIR = "."
@@ -20,6 +21,8 @@ def build():
             os.system("protoc" + " -I=" + INC_DIR
                       + " --java_out=" + DST_DIR + " " + file)
     os.chdir(pwd)
+
+    parse_proto.build()
 
 if __name__ == '__main__':
     build()

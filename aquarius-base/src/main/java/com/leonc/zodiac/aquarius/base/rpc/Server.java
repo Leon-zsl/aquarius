@@ -23,11 +23,12 @@ public class Server
 {
     private static Log logger = LogFactory.getLog(Server.class);
 
+    private AtomicBoolean running = new AtomicBoolean();
     private String listenIp = "";
     private int listenPort = 0;
 
     private boolean singleThread = false;
-    private AtomicBoolean running = new AtomicBoolean();
+    private ExecutorService threadPool = null;
 
     private ServerBootstrap bootstrap = null;
     private Channel serverChannel = null;
@@ -71,6 +72,10 @@ public class Server
 
     public synchronized void start(String ip, int port, 
                                    boolean singleThread) {
+    	this.singleThread = singleThread;
+        if(!singleThread)
+            this.threadPool = Executors.newCachedThreadPool();
+        
         ServerBootstrap bootstrap = new ServerBootstrap(
             new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
                                               Executors.newCachedThreadPool()));
@@ -81,18 +86,19 @@ public class Server
         InetSocketAddress addr = (InetSocketAddress)ch.getLocalAddress();
         this.listenIp = addr.getHostString();
         this.listenPort = addr.getPort();
+        this.serverChannel = ch;
         this.bootstrap = bootstrap;
 
         this.running.set(true);
-        this.singleThread = singleThread;
-        if(!singleThread) {
-            Thread th = new Thread(new Dispatcher());
-            th.start();
-        }
     }
 
     public synchronized void close() {
         this.running.set(false);
+
+        if(this.threadPool != null) {
+            this.threadPool.shutdown();
+            this.threadPool = null;
+        }
 
         for(Channel ch : conns.values()) {
             ch.close();
@@ -117,16 +123,23 @@ public class Server
     //used internal
     public void putPacket(Packet pck, Channel ch) {
         if(pck == null || ch == null) return;
+        if(!running.get()) return;
+
         try {
             Command cmd = new Command(pck, ch);
-            cmdQ.add(cmd);
+            if(singleThread) {
+                cmdQ.add(cmd);
+            } else {
+                threadPool.execute(new CommandHandler(cmd));
+            }
         } catch(Exception ex) {
-            logger.error("create command exception:" + 
-                         "\n[service]" + pck.getServiceName() + 
-                         "\n[method]" + pck.getMethodName() +
-                         "\n[message]" + pck.getMessageName() +
-                         "\n[except]" + ex);
+            logger.error("handle cmd err: " + "\t" + 
+                         pck.getServiceName() + "\t" + 
+                         pck.getMethodName() + "\t" + 
+                         pck.getMessageName() + "\t" + 
+                         ch.getRemoteAddress());
         }
+
     }
 
     //used internal
@@ -228,42 +241,15 @@ public class Server
         }
     }
 
-    private class Dispatcher implements Runnable {
-        public void run() {
-            ExecutorService threalPool = Executors.newCachedThreadPool();
-            while(true) {
-                try {
-                    long st = System.currentTimeMillis();
+    private class CommandHandler implements Runnable {
+        private Command cmd;
 
-                    while(true) {
-                        if(!running.get()) break;
-
-                        Command cmd = cmdQ.poll();
-                        if(cmd == null) break;
-
-                        threalPool.execute(new CommandHandler(cmd));
-                    }
-                    if(!running.get()) break;
-
-                    long elapse = System.currentTimeMillis() - st;
-                    Thread.sleep(30 - elapse);
-                } catch(Exception e) {
-                    logger.error("execute service exception:" + e);
-                }
-            }
-            threalPool.shutdown();
+        public CommandHandler(Command cmd) {
+            this.cmd = cmd;
         }
 
-        private class CommandHandler implements Runnable {
-            private Command cmd;
-
-            public CommandHandler(Command cmd) {
-                this.cmd = cmd;
-            }
-
-            public void run() {
-                handleCommand(this.cmd);
-            }
+        public void run() {
+            handleCommand(this.cmd);
         }
     }
 }
