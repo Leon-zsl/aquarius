@@ -10,5 +10,6 @@ public final class ServiceBuilder
         if(n == null) return;
         n.registerService(new MasterToPeerService(n));
         n.registerService(new PeerToPeerService(n));
+        n.registerService(new PacketService());
     }
 }

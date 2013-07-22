@@ -1,5 +1,6 @@
-package com.leonc.zodiac.aquarius.gate;
+package com.leonc.zodiac.aquarius.base.packet;
 
+//client packet
 public class Packet
 {
     private int opcode = 0;

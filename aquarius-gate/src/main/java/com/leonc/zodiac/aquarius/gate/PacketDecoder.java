@@ -5,6 +5,8 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.jboss.netty.buffer.ChannelBuffer;
 
+import com.leonc.zodiac.aquarius.base.packet.Packet;
+
 public class PacketDecoder extends OneToOneDecoder
 {
     @Override

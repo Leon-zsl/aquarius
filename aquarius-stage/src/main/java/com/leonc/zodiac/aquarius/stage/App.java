@@ -23,11 +23,13 @@ public class App
     private volatile boolean running = false;
     private Node node = new Node();
     private Properties sysConf = new Properties();
+    private StageMgr stageMgr = new StageMgr();
 
     private static Log logger = LogFactory.getLog(App.class);
 
     public Properties getSysConf() { return this.sysConf; }
     public Node getNode() { return this.node; }
+    public StageMgr getStageMgr() { return this.stageMgr; }
 
     public void startup() {
         this.start();
@@ -54,6 +56,8 @@ public class App
             return;
         }
         
+        this.stageMgr.start();
+        
         this.createService(n);
         this.running = true;
 
@@ -65,7 +69,8 @@ public class App
     private void close() {
         logger.info("stage closing...");
         this.running = false;
-
+        
+        this.stageMgr.close();
         if(this.node != null) {
             this.node.close();
             this.node = null;

@@ -13,6 +13,8 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ChannelHandler.Sharable;
 
+import com.leonc.zodiac.aquarius.base.packet.Packet;
+
 @Sharable
 public class PacketRouter extends SimpleChannelUpstreamHandler
 {

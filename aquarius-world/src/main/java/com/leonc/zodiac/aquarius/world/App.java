@@ -23,11 +23,13 @@ public class App
     private volatile boolean running = false;
     private Node node = new Node();
     private Properties sysConf = new Properties();
+    private World world = new World();
 
     private static Log logger = LogFactory.getLog(App.class);
 
     public Properties getSysConf() { return this.sysConf; }
     public Node getNode() { return this.node; }
+    public World getWorld() { return this.world; }
 
     public void startup() {
         this.start();
@@ -54,6 +56,8 @@ public class App
             return;
         }
         
+        this.world.start();
+        
         this.createService(n);
         this.running = true;
 
@@ -65,6 +69,8 @@ public class App
     private void close() {
         logger.info("world closing...");
         this.running = false;
+        
+        this.world.close();
 
         if(this.node != null) {
             this.node.close();
@@ -77,7 +83,7 @@ public class App
         while(this.running) {
             try {
                 long st = System.currentTimeMillis();
-                //do nothing now
+                this.world.update();
                 long dt = System.currentTimeMillis() - st;
                 Thread.sleep(Global.FRAME_TIME - dt);
             } catch(Exception ex) {

@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.leonc.zodiac.aquarius.base.packet.Packet;
+
 public class Acceptor
 {
     private static Log logger = LogFactory.getLog(Acceptor.class);

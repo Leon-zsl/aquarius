@@ -6,6 +6,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 
+import com.leonc.zodiac.aquarius.base.packet.Packet;
+
 public class PacketEncoder extends OneToOneEncoder
 {
     @Override

@@ -1,7 +1,8 @@
 package com.leonc.zodiac.aquarius.gate;
 
 import com.google.protobuf.ByteString;
-import com.leonc.zodiac.aquarius.base.message.MsgPacketForward;
+import com.leonc.zodiac.aquarius.base.message.MsgPacket;
+import com.leonc.zodiac.aquarius.base.packet.Packet;
 import com.leonc.zodiac.aquarius.base.proto.TargetMap;
 
 public class PacketHandler implements Runnable {
@@ -21,11 +22,11 @@ public class PacketHandler implements Runnable {
 		String target = TargetMap.dic.get(packet.getOpcode());
 		String nodeId = PlayerMap.getNodeID(sid, target);
 		
-		MsgPacketForward.Packet pck = MsgPacketForward.Packet.newBuilder().
+		MsgPacket.Packet pck = MsgPacket.Packet.newBuilder().
 			setOpcode(this.packet.getOpcode()).
 			setData(ByteString.copyFrom(this.packet.getData())).build();
-		MsgPacketForward.C2SPacket msg = MsgPacketForward.C2SPacket.newBuilder().
+		MsgPacket.C2SPacket msg = MsgPacket.C2SPacket.newBuilder().
 			setSid(this.sid).setPacket(pck).build();
-		App.getInstance().getNode().remoteCall(nodeId, "PacketForward", "forwardPacket", msg);
+		App.getInstance().getNode().remoteCall(nodeId, "PacketService", "forward", msg);
 	}
 }
