@@ -1,0 +1,19 @@
+package message.stage;
+
+option java_package = "com.leonc.zodiac.aquarius.base.proto";
+option java_outer_classname = "ProtoStage";
+
+option optimize_for = SPEED;
+
+message EnterStage
+{
+    //id = (1 << 17) + 1
+    optional string stageSid = 1;
+}
+
+message LeaveStage
+{
+    //id = (1 << 17) + 2
+    optional string stageSid = 1;
+}
+

@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.leonc.zodiac.aquarius.base.event.Dispatcher;
 import com.leonc.zodiac.aquarius.base.packet.PckDispatcher;
+import com.leonc.zodiac.aquarius.world.handler.HandlersBuilder;
 
 public class World
 {
@@ -24,6 +25,7 @@ public class World
 	
 	public void start() {
 		ModuleBuilder.build(this);
+		HandlersBuilder.build(this);
 	}
 	
 	public void close() {

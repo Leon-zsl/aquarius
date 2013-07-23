@@ -1,0 +1,29 @@
+package proto.account;
+
+option java_package = "com.leonc.zodiac.aquarius.base.proto";
+option java_outer_classname = "ProtoWorld";
+
+option optimize_for = SPEED;
+
+message Login
+{
+    //id = (1 << 16) + 1
+    //target = world
+    optional string sid = 1;
+}
+
+message Logout
+{
+    //id = (1 << 16) + 2
+    //target = world
+    optional string sid = 1;
+}
+
+message SwitchStage
+{
+    //id = (1 << 16) + 100
+    //target = world
+    optional string stageSid = 1;
+}
+
+

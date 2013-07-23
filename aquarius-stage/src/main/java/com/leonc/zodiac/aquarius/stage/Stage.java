@@ -11,6 +11,7 @@ import com.leonc.zodiac.aquarius.base.event.Dispatcher;
 import com.leonc.zodiac.aquarius.base.packet.PckDispatcher;
 import com.leonc.zodiac.aquarius.base.util.Clock;
 import com.leonc.zodiac.aquarius.stage.actor.Actor;
+import com.leonc.zodiac.aquarius.stage.handler.HandlersBuilder;
 import com.leonc.zodiac.aquarius.stage.quest.QuestMgr;
 import com.leonc.zodiac.aquarius.stage.scene.Scene;
 
@@ -55,6 +56,7 @@ public class Stage
 	
 	public void startup() {
 		this.running = true;
+		HandlersBuilder.build(this);
 		Thread th = new Thread(new StageImpl(this));
 		th.start();
 	}
