@@ -19,7 +19,7 @@ import com.leonc.zodiac.aquarius.stage.scene.Scene;
 public class Stage
 {
 	private static Log logger = LogFactory.getLog(Stage.class);
-	
+
 	private volatile boolean running = false;
 
 	private String uuid = UUID.randomUUID().toString();

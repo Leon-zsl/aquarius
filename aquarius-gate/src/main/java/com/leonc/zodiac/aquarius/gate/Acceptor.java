@@ -111,6 +111,6 @@ public class Acceptor
     public void recvPacket(String sid, Packet pck) {
     	if(pck == null) return;
     	
-    	this.threadPool.execute(new PacketHandler(sid, pck));
+    	this.threadPool.execute(new PacketDispatcher(sid, pck));
     }
 }

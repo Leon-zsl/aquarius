@@ -113,12 +113,17 @@ public class App
 
     private Node startNode(Properties conf) {
         String nodetype = conf.getProperty("node_type");
+        String ip = conf.getProperty("listen_ip");
         int port = Integer.parseInt(conf.getProperty("listen_port"));
 
         this.node.setNodeType(nodetype);
         this.node.setServerConnListener(new DefaultServerConnListener(this.node));
         this.node.setClientConnListener(new DefaultClientConnListener(this.node));
-        this.node.start(port);
+        
+        if(ip == null || ip.equals("") || ip.equals("0") || ip.equals("0.0.0.0"))
+        	this.node.start(port);
+        else 
+        	this.node.start(ip, port, false);
 
         return this.node;
     }
@@ -146,7 +151,12 @@ public class App
     }
     
     private void startAccept(Properties conf) {
+    	String ip = conf.getProperty("acceptor_ip");
     	int port = Integer.parseInt(conf.getProperty("acceptor_port"));
-    	this.acceptor.start(port);
+    	
+    	if(ip == null || ip.equals("") || ip.equals("0") || ip.equals("0.0.0.0"))
+        	this.acceptor.start(port);
+        else 
+        	this.acceptor.start(ip, port);
     }
 }

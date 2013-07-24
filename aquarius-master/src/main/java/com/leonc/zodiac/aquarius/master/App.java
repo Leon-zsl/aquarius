@@ -102,13 +102,17 @@ public class App
     private Node startNode(Properties conf) {
         String nodeid = conf.getProperty("node_id");
         String nodetype = conf.getProperty("node_type");
+        String ip = conf.getProperty("listen_ip");
         int port = Integer.parseInt(conf.getProperty("listen_port"));
 
         this.node.setNodeId(nodeid).setNodeType(nodetype);
         this.node.setServerConnListener(new DefaultServerConnListener(this.node));
         this.node.setClientConnListener(new DefaultClientConnListener(this.node));
-        //this.node.start("127.0.0.1", port, false);
-        this.node.start(port);
+        
+        if(ip == null || ip.equals("") || ip.equals("0") || ip.equals("0.0.0.0"))
+        	this.node.start(port);
+        else 
+        	this.node.start(ip, port, false);
 
         return this.node;
     }
