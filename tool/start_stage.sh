@@ -3,6 +3,8 @@ RUNTIME_PARAM="-server -Xms1024m -Xmx1024m -Xmn480m -Xss256k -XX:+UseParallelGC 
 DEBUG=""
 CLSPATH=""
 
-CMDS="java $RUNTIME_PARAM $DEBUG $CLSPATH -jar ../release/aquarius-stage-1.0-SNAPSHOT.jar"
+pushd ../release
+CMDS="java $RUNTIME_PARAM $DEBUG $CLSPATH -jar aquarius-stage-1.0-SNAPSHOT.jar"
 echo $CMDS
 nohup $CMDS &
+popd

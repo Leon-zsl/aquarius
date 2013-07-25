@@ -17,7 +17,7 @@ sleep 2
 
 echo "start stage..."
 ./start_stage.sh
-slepp 2
+sleep 2
 
 echo "start gate..."
 ./start_gate.sh
@@ -30,3 +30,5 @@ sleep 2
 echo "start account..."
 ./start_account.sh
 sleep 2
+
+ps aux | grep java
