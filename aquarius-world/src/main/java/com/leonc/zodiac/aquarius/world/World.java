@@ -2,6 +2,7 @@ package com.leonc.zodiac.aquarius.world;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,7 +16,7 @@ public class World
 	private static Log logger = LogFactory.getLog(World.class);
 	
 	private ConcurrentHashMap<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
-	private ArrayList<Module> modules = new ArrayList<Module>();
+	private CopyOnWriteArraySet<Module> modules = new CopyOnWriteArraySet<Module>();
 	
 	private Dispatcher dispatcher = new Dispatcher();
 	private PckDispatcher pckDispatcher = new PckDispatcher();
@@ -54,11 +55,7 @@ public class World
 		playerMap.remove(sid);
 	}
 	
-	public Module getModule(int idx) {
-		return modules.get(idx);
-	}
-	
-	public Module getModule(Class cls) {
+	public Module getModule(Class<? extends Module> cls) {
 		for(Module m : modules) {
 			if(m.getClass().equals(cls))
 				return m;

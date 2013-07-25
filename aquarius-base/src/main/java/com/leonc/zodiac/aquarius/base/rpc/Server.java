@@ -228,7 +228,7 @@ public class Server
                 return;
             }
 
-            Class clsService = sv.getClass();
+            Class<? extends Service> clsService = sv.getClass();
             Method handler = clsService.getDeclaredMethod(cmd.getMethodName(), 
                                                           Command.class);
             handler.invoke(sv, cmd);

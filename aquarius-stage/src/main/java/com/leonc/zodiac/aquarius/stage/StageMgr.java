@@ -21,7 +21,7 @@ public class StageMgr
 	public Stage createStage() {
 		Stage st = new Stage();
 		stageMap.put(st.getUuid(), st);
-		st.startup();
+		new Thread(st).start();
 		return st;
 	}
 	

@@ -8,15 +8,15 @@ public class ModuleBuilder
 {
 	public static void build(World w) {
 		Module m = new GuildMgr();
-		m.startup();
+		new Thread(m).start();
 		w.addModule(m);
 		
 		m = new TradeMgr();
-		m.startup();
+		new Thread(m).start();;
 		w.addModule(m);
 		
 		m = new RepositoryMgr();
-		m.startup();
+		new Thread(m).start();
 		w.addModule(m);
 	}
 }

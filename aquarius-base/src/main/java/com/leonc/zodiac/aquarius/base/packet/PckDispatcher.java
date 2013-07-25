@@ -1,6 +1,5 @@
 package com.leonc.zodiac.aquarius.base.packet;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

@@ -16,7 +16,7 @@ import com.leonc.zodiac.aquarius.stage.quest.QuestMgr;
 import com.leonc.zodiac.aquarius.stage.scene.Scene;
 
 //one thread one stage
-public class Stage
+public class Stage implements Runnable
 {
 	private static Log logger = LogFactory.getLog(Stage.class);
 
@@ -37,6 +37,10 @@ public class Stage
 	public PckDispatcher getPckDispatcher() { return this.pckDispatcher; }
 	public QuestMgr getQuestMgr() { return this.questMgr; }
 	
+	public Stage() {
+		HandlersBuilder.build(this);
+	}
+	
 	public Actor getActor(String uuid) {
 		return this.actorMap.get(uuid);
 	}
@@ -53,63 +57,50 @@ public class Stage
 	public void delActor(String uuid) {
 		actorMap.remove(uuid);
 	}
-	
-	public void startup() {
-		this.running = true;
-		HandlersBuilder.build(this);
-		Thread th = new Thread(new StageImpl(this));
-		th.start();
-	}
-	
+
 	public void shutdown() {
 		this.running = false;
 	}
 	
-	public class StageImpl implements Runnable {
-		private Stage owner = null;
-		public StageImpl(Stage owner) {
-			this.owner= owner;
-		}
-		
-		public void run() {
-			this.start();
-			while(this.owner.running) {
-				try {
-					long t = System.currentTimeMillis();
-					this.update();
-					long dt = System.currentTimeMillis() - t;
-					if(Global.STAGE_FRAME_TIME - dt > 0)
-						Thread.sleep(Global.STAGE_FRAME_TIME - dt);
-				} catch (Exception ex) {
-					logger.error("stage except: " + uuid + ":" + ex);
-				}
+	public void run() {
+		this.start();
+		while(this.running) {
+			try {
+				long t = System.currentTimeMillis();
+				this.update();
+				long dt = System.currentTimeMillis() - t;
+				if(Global.STAGE_FRAME_TIME - dt > 0)
+					Thread.sleep(Global.STAGE_FRAME_TIME - dt);
+			} catch (Exception ex) {
+				logger.error("stage except: " + uuid + ":" + ex);
 			}
-			this.close();
 		}
-		
-		private void start() {
-			this.owner.clock.start();
-			this.owner.scene.start();
-			this.owner.questMgr.start();
+		this.close();
+	}
+	
+	private void start() {
+		this.running = true;
+		this.clock.start();
+		this.scene.start();
+		this.questMgr.start();
+	}
+	
+	private void close() {
+		for(Actor act : this.actorMap.values()) {
+			act.close();
 		}
-		
-		private void close() {
-			for(Actor act : this.owner.actorMap.values()) {
-				act.close();
-			}
-			this.owner.scene.close();
-			this.owner.questMgr.close();
-		}
-		
-		private void update() {
-			this.owner.clock.update();
-			this.owner.pckDispatcher.dispatch();
-			this.owner.dispatcher.dispatch();
-			this.owner.scene.update();
-			this.owner.questMgr.update();
-			for(Actor act : this.owner.actorMap.values()) {
-				act.update();
-			}
+		this.scene.close();
+		this.questMgr.close();
+	}
+	
+	private void update() {
+		this.clock.update();
+		this.pckDispatcher.dispatch();
+		this.dispatcher.dispatch();
+		this.scene.update();
+		this.questMgr.update();
+		for(Actor act : this.actorMap.values()) {
+			act.update();
 		}
 	}
 }
