@@ -7,15 +7,32 @@ import com.leonc.zodiac.aquarius.base.packet.Packet;
 import com.leonc.zodiac.aquarius.base.packet.PacketWrapper;
 import com.leonc.zodiac.aquarius.gate.App;
 
+import com.leonc.zodiac.aquarius.base.proto.ProtoEcho;
+
 public class EchoHandler implements Handler 
 {
 	private static Log logger = LogFactory.getLog(EchoHandler.class);
 	
 	public void handle(PacketWrapper pw) {
-		logger.info("recv pck: [op]" + pw.getPacket().getOpcode() + 
-					" [msg]" + new String(pw.getPacket().getData()));
-		
-		App.getInstance().getAcceptor().sendPacket(pw.getSid(), 
-				new Packet(2, "this is server".getBytes()));
+		try {
+			int op = pw.getPacket().getOpcode();
+			byte[] data = pw.getPacket().getData();
+			ProtoEcho.EchoMsg msg = ProtoEcho.EchoMsg.parseFrom(data);
+			logger.info("recv pck: [op]" + op + 
+						"[id]" + msg.getId() +
+						"[data]" + msg.getData() +
+						"[uid]" + msg.getUid() +
+						"[info]" + msg.getInfo());
+			
+			ProtoEcho.EchoMsg sm = ProtoEcho.EchoMsg.newBuilder().
+					setId(msg.getId() + 1).
+					setData("this is server").
+					setUid(msg.getUid() + 1).
+					setInfo("this is response").build();
+			App.getInstance().getAcceptor().sendPacket(pw.getSid(), 
+					new Packet(2, sm.toByteArray()));
+		} catch (Exception e) {
+			logger.error("parse pck err: " + e);
+		}
 	}
 }
